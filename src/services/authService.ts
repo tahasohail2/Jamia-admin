@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
   },
 });
 
-// Attach adminToken to every request
+// Attach adminToken as Authorization header (browsers block manual Cookie header)
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
   if (token) {
@@ -31,7 +31,10 @@ class AuthService {
       const token = (response.data as any).adminToken;
       if (token) {
         localStorage.setItem('adminToken', token);
+        localStorage.setItem('isAuthenticated', 'true');
       }
+      // Clear any previous logout flag so verifyToken works on next load
+      sessionStorage.removeItem('loggedOut');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -47,13 +50,8 @@ class AuthService {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Clear localStorage
       localStorage.removeItem('adminToken');
-      localStorage.clear();
-      // Clear sessionStorage
-      sessionStorage.clear();
-      // Clear adminToken cookie
-      document.cookie = 'adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      localStorage.removeItem('isAuthenticated');
     }
   }
 

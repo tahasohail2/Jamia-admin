@@ -5,14 +5,14 @@ import LoginForm from '../components/LoginForm';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  // Redirect to dashboard if already authenticated
+  // Only redirect once auth state is resolved, not during initial load
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && isAuthenticated) {
       navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   return (
     <div className="login-page">

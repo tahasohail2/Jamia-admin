@@ -47,7 +47,13 @@ class AuthService {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      // Clear localStorage
       localStorage.removeItem('adminToken');
+      localStorage.clear();
+      // Clear sessionStorage
+      sessionStorage.clear();
+      // Clear adminToken cookie
+      document.cookie = 'adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     }
   }
 

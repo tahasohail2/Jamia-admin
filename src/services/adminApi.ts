@@ -22,7 +22,7 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Trigger logout on 401
-      window.location.href = '/login';
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

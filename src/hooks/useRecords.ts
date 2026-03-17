@@ -15,7 +15,7 @@ export const useRecords = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [pageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const autoRefreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchRecords = useCallback(async () => {
     try {

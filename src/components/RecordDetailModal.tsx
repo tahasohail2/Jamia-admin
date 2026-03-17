@@ -38,7 +38,7 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Student Record Details</h2>
+          <h2>طالب علم کے ریکارڈ کی تفصیل</h2>
           <button
             className="modal-close"
             onClick={onClose}
@@ -51,14 +51,14 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
         <div className="modal-body">
           {/* Metadata Section */}
           <div className="detail-section">
-            <h3 className="section-title">Record Information</h3>
+            <h3 className="section-title">ریکارڈ کی معلومات</h3>
             <div className="detail-grid">
               <div className="detail-item">
-                <span className="detail-label">Record ID:</span>
+                <span className="detail-label">ریکارڈ آئی ڈی:</span>
                 <span className="detail-value">{record.id}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Submitted At:</span>
+                <span className="detail-label">جمع کرانے کا وقت:</span>
                 <span className="detail-value">{formatDateTime(record.submittedAt)}</span>
               </div>
             </div>
@@ -66,38 +66,38 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
           {/* Personal Information Section */}
           <div className="detail-section">
-            <h3 className="section-title">Personal Information</h3>
+            <h3 className="section-title">ذاتی معلومات</h3>
             <div className="detail-grid">
               <div className="detail-item">
-                <span className="detail-label">Student Name:</span>
+                <span className="detail-label">طالب علم کا نام:</span>
                 <span className="detail-value">{record.studentName}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Father Name:</span>
+                <span className="detail-label">والد کا نام:</span>
                 <span className="detail-value">{record.fatherName}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Date of Birth:</span>
+                <span className="detail-label">تاریخ پیدائش:</span>
                 <span className="detail-value">{formatDate(record.dob)}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">CNIC:</span>
+                <span className="detail-label">شناختی کارڈ:</span>
                 <span className="detail-value">{record.cnic}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Phone:</span>
+                <span className="detail-label">فون:</span>
                 <span className="detail-value">{record.phone}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">WhatsApp:</span>
-                <span className="detail-value">{record.whatsapp || 'N/A'}</span>
+                <span className="detail-label">واٹس ایپ:</span>
+                <span className="detail-value">{record.whatsapp || 'غیر متعین'}</span>
               </div>
               <div className="detail-item full-width">
-                <span className="detail-label">Full Address:</span>
+                <span className="detail-label">مستقل پتہ:</span>
                 <span className="detail-value">{record.fullAddress}</span>
               </div>
               <div className="detail-item full-width">
-                <span className="detail-label">Current Address:</span>
+                <span className="detail-label">موجودہ پتہ:</span>
                 <span className="detail-value">{record.currentAddress}</span>
               </div>
             </div>
@@ -105,72 +105,72 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
           {/* Academic Information Section */}
           <div className="detail-section">
-            <h3 className="section-title">Academic Information</h3>
+            <h3 className="section-title">تعلیمی معلومات</h3>
             <div className="detail-grid">
               <div className="detail-item">
-                <span className="detail-label">Admission Type:</span>
+                <span className="detail-label">داخلہ کی قسم:</span>
                 <span className="detail-value">
                   <span className={`badge badge-${record.admissionType === 'نیا داخلہ' ? 'new' : 'existing'}`}>
-                    {record.admissionType === 'نیا داخلہ' ? 'New Admission' : 'Existing Student'}
+                    {record.admissionType === 'نیا داخلہ' ? 'نیا داخلہ' : 'پہلے سے زیر تعلیم'}
                   </span>
                 </span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Gender:</span>
+                <span className="detail-label">جنس:</span>
                 <span className="detail-value">{record.gender}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Department:</span>
+                <span className="detail-label">شعبہ:</span>
                 <span className="detail-value">{record.department}</span>
               </div>
 
               {record.admissionType === 'نیا داخلہ' ? (
                 <>
                   <div className="detail-item">
-                    <span className="detail-label">Education Type:</span>
-                    <span className="detail-value">{record.educationType || 'N/A'}</span>
+                    <span className="detail-label">تعلیم کی قسم:</span>
+                    <span className="detail-value">{record.educationType || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Required Grade:</span>
-                    <span className="detail-value">{record.requiredGrade || 'N/A'}</span>
+                    <span className="detail-label">مطلوبہ جماعت:</span>
+                    <span className="detail-value">{record.requiredGrade || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Previous Education:</span>
-                    <span className="detail-value">{record.previousEducation || 'N/A'}</span>
+                    <span className="detail-label">سابقہ تعلیم:</span>
+                    <span className="detail-value">{record.previousEducation || 'غیر متعین'}</span>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="detail-item">
-                    <span className="detail-label">Registration No:</span>
-                    <span className="detail-value">{record.registrationNo || 'N/A'}</span>
+                    <span className="detail-label">رجسٹریشن نمبر:</span>
+                    <span className="detail-value">{record.registrationNo || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Last Year Grade:</span>
-                    <span className="detail-value">{record.lastYearGrade || 'N/A'}</span>
+                    <span className="detail-label">گزشتہ سال کی جماعت:</span>
+                    <span className="detail-value">{record.lastYearGrade || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Next Year Grade:</span>
-                    <span className="detail-value">{record.nextYearGrade || 'N/A'}</span>
+                    <span className="detail-label">اگلے سال کی جماعت:</span>
+                    <span className="detail-value">{record.nextYearGrade || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Exam Part 1 Marks:</span>
-                    <span className="detail-value">{record.examPart1Marks || 'N/A'}</span>
+                    <span className="detail-label">امتحان حصہ اول نمبر:</span>
+                    <span className="detail-value">{record.examPart1Marks || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Exam Part 2 Marks:</span>
-                    <span className="detail-value">{record.examPart2Marks || 'N/A'}</span>
+                    <span className="detail-label">امتحان حصہ دوم نمبر:</span>
+                    <span className="detail-value">{record.examPart2Marks || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Total Marks:</span>
-                    <span className="detail-value">{record.totalMarks || 'N/A'}</span>
+                    <span className="detail-label">کل نمبر:</span>
+                    <span className="detail-value">{record.totalMarks || 'غیر متعین'}</span>
                   </div>
                 </>
               )}
 
               {record.remarks && (
                 <div className="detail-item full-width">
-                  <span className="detail-label">Remarks:</span>
+                  <span className="detail-label">ملاحظات:</span>
                   <span className="detail-value">{record.remarks}</span>
                 </div>
               )}
@@ -179,16 +179,16 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
           {/* Documents Section */}
           <div className="detail-section">
-            <h3 className="section-title">Documents</h3>
+            <h3 className="section-title">دستاویزات</h3>
             <div className="documents-grid">
               {record.certificateUrls && record.certificateUrls.length > 0 && (
                 <div className="document-group">
-                  <h4>Certificates</h4>
+                  <h4>سرٹیفکیٹس</h4>
                   <ul className="document-list">
                     {record.certificateUrls.map((url, index) => (
                       <li key={index}>
                         <a href={url} target="_blank" rel="noopener noreferrer">
-                          📄 Certificate {index + 1}
+                          📄 سرٹیفکیٹ {index + 1}
                         </a>
                       </li>
                     ))}
@@ -198,12 +198,12 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
               {record.cnicUrls && record.cnicUrls.length > 0 && (
                 <div className="document-group">
-                  <h4>CNIC Documents</h4>
+                  <h4>شناختی کارڈ دستاویزات</h4>
                   <ul className="document-list">
                     {record.cnicUrls.map((url, index) => (
                       <li key={index}>
                         <a href={url} target="_blank" rel="noopener noreferrer">
-                          📄 CNIC Document {index + 1}
+                          📄 شناختی کارڈ {index + 1}
                         </a>
                       </li>
                     ))}
@@ -213,12 +213,12 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
               {record.additionalUrls && record.additionalUrls.length > 0 && (
                 <div className="document-group">
-                  <h4>Additional Documents</h4>
+                  <h4>اضافی دستاویزات</h4>
                   <ul className="document-list">
                     {record.additionalUrls.map((url, index) => (
                       <li key={index}>
                         <a href={url} target="_blank" rel="noopener noreferrer">
-                          📄 Additional Document {index + 1}
+                          📄 اضافی دستاویز {index + 1}
                         </a>
                       </li>
                     ))}
@@ -229,7 +229,7 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
               {(!record.certificateUrls || record.certificateUrls.length === 0) &&
                (!record.cnicUrls || record.cnicUrls.length === 0) &&
                (!record.additionalUrls || record.additionalUrls.length === 0) && (
-                <p className="no-documents">No documents uploaded</p>
+                <p className="no-documents">کوئی دستاویز اپلوڈ نہیں کی گئی</p>
               )}
             </div>
           </div>
@@ -237,7 +237,7 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
         <div className="modal-footer">
           <button className="btn btn-primary" onClick={onClose}>
-            Close
+            بند کریں
           </button>
         </div>
       </div>

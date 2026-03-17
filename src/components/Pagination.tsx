@@ -77,7 +77,7 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="pagination">
       <div className="pagination-info">
-        Showing {startRecord} to {endRecord} of {totalRecords} records
+        {totalRecords} ریکارڈز میں سے {startRecord} تا {endRecord} دکھائے جا رہے ہیں
       </div>
 
       <div className="pagination-controls">
@@ -87,7 +87,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === 1}
           aria-label="Previous page"
         >
-          ← Previous
+          ← پچھلا
         </button>
 
         <div className="pagination-pages">
@@ -116,7 +116,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === totalPages}
           aria-label="Next page"
         >
-          Next →
+          اگلا →
         </button>
       </div>
     </div>

@@ -32,7 +32,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
   return (
     <div className="filter-panel">
       <div className="filter-header">
-        <h3>Filters</h3>
+        <h3>فلٹرز</h3>
         {activeFilterCount > 0 && (
           <span className="filter-badge">{activeFilterCount}</span>
         )}
@@ -41,7 +41,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
       <div className="filter-controls">
         <div className="filter-group">
           <label htmlFor="admissionType" className="filter-label">
-            Admission Type
+            داخلہ کی قسم
           </label>
           <select
             id="admissionType"
@@ -49,15 +49,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
             value={filters.admissionType || ''}
             onChange={(e) => handleChange('admissionType', e.target.value)}
           >
-            <option value="">All</option>
-            <option value="نیا داخلہ">New Admission (نیا داخلہ)</option>
-            <option value="پہلے سے زیر تعلیم">Existing Student (پہلے سے زیر تعلیم)</option>
+            <option value="">سب</option>
+            <option value="نیا داخلہ">نیا داخلہ</option>
+            <option value="پہلے سے زیر تعلیم">پہلے سے زیر تعلیم</option>
           </select>
         </div>
 
         <div className="filter-group">
           <label htmlFor="gender" className="filter-label">
-            Gender
+            جنس
           </label>
           <select
             id="gender"
@@ -65,15 +65,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
             value={filters.gender || ''}
             onChange={(e) => handleChange('gender', e.target.value)}
           >
-            <option value="">All</option>
-            <option value="طالب">Male (طالب)</option>
-            <option value="طالبہ">Female (طالبہ)</option>
+            <option value="">سب</option>
+            <option value="طالب">طالب</option>
+            <option value="طالبہ">طالبہ</option>
           </select>
         </div>
 
         <div className="filter-group">
           <label htmlFor="department" className="filter-label">
-            Department
+            شعبہ
           </label>
           <select
             id="department"
@@ -81,10 +81,10 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
             value={filters.department || ''}
             onChange={(e) => handleChange('department', e.target.value)}
           >
-            <option value="">All</option>
-            <option value="حفظ">Hifz (حفظ)</option>
-            <option value="تجوید">Tajweed (تجوید)</option>
-            <option value="درس نظامی / عالمہ فاضلہ">Dars-e-Nizami (درس نظامی / عالمہ فاضلہ)</option>
+            <option value="">سب</option>
+            <option value="حفظ">حفظ</option>
+            <option value="تجوید">تجوید</option>
+            <option value="درس نظامی / عالمہ فاضلہ">درس نظامی / عالمہ فاضلہ</option>
           </select>
         </div>
 
@@ -93,7 +93,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
             className="btn btn-clear-filters"
             onClick={handleClearFilters}
           >
-            Clear Filters
+            فلٹرز صاف کریں
           </button>
         )}
       </div>

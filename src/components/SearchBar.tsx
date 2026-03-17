@@ -7,7 +7,7 @@ interface SearchBarProps {
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
   onSearch, 
-  placeholder = 'Search by name, CNIC, or registration number...' 
+  placeholder = 'نام، شناختی کارڈ، یا رجسٹریشن نمبر سے تلاش کریں...' 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 

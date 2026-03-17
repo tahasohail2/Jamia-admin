@@ -54,7 +54,6 @@ class AdminApi {
       const response = await axiosInstance.get<PaginatedResponse<StudentRecord>>(
         `/api/admin/records?${params.toString()}`
       );
-      console.log(response.data)
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

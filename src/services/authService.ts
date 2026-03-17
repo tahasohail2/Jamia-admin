@@ -5,10 +5,21 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // Important for HTTP-only cookies
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Attach adminToken cookie to every request
+axiosInstance.interceptors.request.use((config) => {
+  const match = document.cookie.split('; ').find(row => row.startsWith('adminToken='));
+  if (match) {
+    const token = match.split('=')[1];
+    config.headers['Authorization'] = `Bearer ${token}`;
+    config.headers['Cookie'] = `adminToken=${token}`;
+  }
+  return config;
 });
 
 class AuthService {

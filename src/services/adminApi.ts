@@ -16,6 +16,17 @@ const axiosInstance = axios.create({
   },
 });
 
+// Add request interceptor to attach adminToken cookie as header
+axiosInstance.interceptors.request.use((config) => {
+  const match = document.cookie.split('; ').find(row => row.startsWith('adminToken='));
+  if (match) {
+    const token = match.split('=')[1];
+    config.headers['Authorization'] = `Bearer ${token}`;
+    config.headers['Cookie'] = `adminToken=${token}`;
+  }
+  return config;
+});
+
 // Add response interceptor to handle 401 errors
 axiosInstance.interceptors.response.use(
   (response) => response,

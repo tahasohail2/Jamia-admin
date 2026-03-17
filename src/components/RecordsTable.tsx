@@ -16,22 +16,20 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
 }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    const year = date.getFullYear().toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    const month = String(date.getMonth() + 1).padStart(2, '0').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    const day = String(date.getDate()).padStart(2, '0').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    return `${year}/${month}/${day}`;
   };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const year = date.getFullYear().toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    const month = String(date.getMonth() + 1).padStart(2, '0').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    const day = String(date.getDate()).padStart(2, '0').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    const hours = String(date.getHours()).padStart(2, '0').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    const minutes = String(date.getMinutes()).padStart(2, '0').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+    return `(${hours}:${minutes}) ${year}/${month}/${day}`;
   };
 
   if (isLoading) {
@@ -56,9 +54,9 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
       <table className="records-table">
         <thead>
           <tr>
-            <th>آئی ڈی</th>
             <th>طالب علم کا نام</th>
             <th>والد کا نام</th>
+            <th>رجسٹریشن نمبر</th>
             <th>داخلہ کی قسم</th>
             <th>جنس</th>
             <th>شعبہ</th>
@@ -78,9 +76,9 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               onClick={() => onRecordClick(record)}
               style={{ cursor: 'pointer' }}
             >
-              <td>{record.id}</td>
               <td>{record.studentName}</td>
               <td>{record.fatherName}</td>
+              <td>{record.registrationNo || 'غیر متعین'}</td>
               <td>
                 <span className={`badge badge-${record.admissionType === 'نیا داخلہ' ? 'new' : 'existing'}`}>
                   {record.admissionType === 'نیا داخلہ' ? 'نیا' : 'پرانا'}

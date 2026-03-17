@@ -12,7 +12,8 @@ function App() {
       <ToastProvider>
         <Router>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
             <Route
               path="/dashboard"
               element={
@@ -21,7 +22,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
           <ToastContainer />
         </Router>

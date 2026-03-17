@@ -42,7 +42,7 @@ const DashboardPage: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
       showToast('لاگ آؤٹ ناکام ہوا', 'error');
@@ -111,7 +111,7 @@ const DashboardPage: React.FC = () => {
             <p className="header-subtitle">طلبہ داخلہ ریکارڈز</p>
           </div>
           <div className="header-center">
-            <img src="/logoHeader.png" alt="Logo" className="header-logo" />
+            <img src="/1.png" alt="Logo" className="header-logo" />
           </div>
           <div className="header-right">
             <span className="user-info">خوش آمدید، {user?.username}</span>

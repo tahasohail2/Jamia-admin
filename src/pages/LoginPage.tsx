@@ -17,6 +17,9 @@ const LoginPage: React.FC = () => {
   return (
     <div className="login-page">
       <div className="login-container">
+        <div className="login-logo-wrapper">
+          <img src="/1.png" alt="Logo" className="login-logo" />
+        </div>
         <div className="login-card">
           <div className="login-header">
             <h1>ایڈمن پینل</h1>
@@ -24,9 +27,9 @@ const LoginPage: React.FC = () => {
           </div>
           <LoginForm />
           <div className="login-footer">
-            <p className="login-note">
+            {/* <p className="login-note">
               ڈیفالٹ اسناد: <strong>admin</strong> / <strong>admin123</strong>
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

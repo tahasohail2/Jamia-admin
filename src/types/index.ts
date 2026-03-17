@@ -10,6 +10,7 @@ export interface StudentRecord {
   cnic: string;
   phone: string;
   educationType: string;
+  registrationNo: string;
   submittedAt: string;
 }
 

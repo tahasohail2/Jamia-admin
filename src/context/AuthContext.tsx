@@ -21,16 +21,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [lastActivity, setLastActivity] = useState(Date.now());
 
   const verifyToken = useCallback(async () => {
+    // Only verify if we have a stored token AND a persisted auth flag
+    // This prevents hitting the server after an explicit logout
+    const hasToken = !!localStorage.getItem('adminToken');
+    const wasAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+    if (!hasToken || !wasAuthenticated) {
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await authService.verifyToken();
       if (response && response.user) {
         setUser(response.user);
         setLastActivity(Date.now());
       } else {
+        // Server rejected the token — clean up
         setUser(null);
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('isAuthenticated');
       }
     } catch (error) {
       setUser(null);
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('isAuthenticated');
     } finally {
       setIsLoading(false);
     }

@@ -11,12 +11,10 @@ const axiosInstance = axios.create({
   },
 });
 
-// Attach adminToken cookie to every request
+// Attach adminToken to every request
 axiosInstance.interceptors.request.use((config) => {
-  const match = document.cookie.split('; ').find(row => row.startsWith('adminToken='));
-  if (match) {
-    const token = match.split('=')[1];
-    config.headers['Authorization'] = `Bearer ${token}`;
+  const token = localStorage.getItem('adminToken');
+  if (token) {
     config.headers['Cookie'] = `adminToken=${token}`;
   }
   return config;
@@ -29,6 +27,11 @@ class AuthService {
         '/api/auth/login',
         credentials
       );
+      // Store token from response body
+      const token = (response.data as any).adminToken;
+      if (token) {
+        localStorage.setItem('adminToken', token);
+      }
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -43,14 +46,14 @@ class AuthService {
       await axiosInstance.post('/api/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if logout fails on server, we should clear client state
+    } finally {
+      localStorage.removeItem('adminToken');
     }
   }
 
   async verifyToken(): Promise<AuthResponse | null> {
     try {
       const response = await axiosInstance.get('/api/auth/verify');
-      // Backend returns { user: { id, username } } on success
       if (response.data.user) {
         return { user: response.data.user };
       }

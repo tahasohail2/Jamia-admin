@@ -18,10 +18,10 @@ const LoginForm: React.FC = () => {
     // Validation
     const errors: { username?: string; password?: string } = {};
     if (!username.trim()) {
-      errors.username = 'Username is required';
+      errors.username = 'یوزر نیم درج کریں';
     }
     if (!password) {
-      errors.password = 'Password is required';
+      errors.password = 'پاس ورڈ درج کریں';
     }
 
     if (Object.keys(errors).length > 0) {
@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
       // Navigation will be handled by LoginPage useEffect
     } catch (err: any) {
       console.error('Login failed:', err);
-      setError(err.response?.data?.message || 'Invalid username or password');
+      setError(err.response?.data?.message || 'یوزر نیم یا پاس ورڈ غلط ہے');
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +48,7 @@ const LoginForm: React.FC = () => {
     <form onSubmit={handleSubmit} className="login-form">
       <div className="form-group">
         <label htmlFor="username" className="form-label">
-          Username
+          یوزر نیم
         </label>
         <input
           type="text"
@@ -58,7 +58,7 @@ const LoginForm: React.FC = () => {
           onChange={(e) => setUsername(e.target.value)}
           disabled={isLoading}
           autoComplete="username"
-          placeholder="Enter your username"
+          placeholder="یوزر نیم درج کریں"
         />
         {validationErrors.username && (
           <div className="form-error">{validationErrors.username}</div>
@@ -67,7 +67,7 @@ const LoginForm: React.FC = () => {
 
       <div className="form-group">
         <label htmlFor="password" className="form-label">
-          Password
+          پاس ورڈ
         </label>
         <input
           type="password"
@@ -77,7 +77,7 @@ const LoginForm: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
           autoComplete="current-password"
-          placeholder="Enter your password"
+          placeholder="پاس ورڈ درج کریں"
         />
         {validationErrors.password && (
           <div className="form-error">{validationErrors.password}</div>
@@ -98,10 +98,10 @@ const LoginForm: React.FC = () => {
         {isLoading ? (
           <>
             <span className="spinner-small"></span>
-            Logging in...
+            لاگ ان ہو رہا ہے...
           </>
         ) : (
-          'Login'
+          'لاگ ان'
         )}
       </button>
     </form>

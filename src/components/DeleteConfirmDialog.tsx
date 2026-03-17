@@ -21,7 +21,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Confirm Deletion</h2>
+          <h2>حذف کرنے کی تصدیق</h2>
           <button
             className="modal-close"
             onClick={onCancel}
@@ -34,10 +34,10 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
 
         <div className="modal-body">
           <p className="delete-warning">
-            Are you sure you want to delete the record for <strong>{studentName}</strong>?
+            کیا آپ واقعی <strong>{studentName}</strong> کا ریکارڈ حذف کرنا چاہتے ہیں؟
           </p>
           <p className="delete-note">
-            This action cannot be undone.
+            یہ عمل واپس نہیں کیا جا سکتا۔
           </p>
         </div>
 
@@ -47,7 +47,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
             onClick={onCancel}
             disabled={isDeleting}
           >
-            Cancel
+            منسوخ
           </button>
           <button
             className="btn btn-danger"
@@ -57,10 +57,10 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
             {isDeleting ? (
               <>
                 <span className="spinner-small"></span>
-                Deleting...
+                حذف ہو رہا ہے...
               </>
             ) : (
-              'Delete'
+              'حذف کریں'
             )}
           </button>
         </div>

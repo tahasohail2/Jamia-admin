@@ -38,7 +38,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
     return (
       <div className="table-loading">
         <div className="spinner"></div>
-        <p>Loading records...</p>
+        <p>ریکارڈز لوڈ ہو رہے ہیں...</p>
       </div>
     );
   }
@@ -46,7 +46,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
   if (records.length === 0) {
     return (
       <div className="table-empty">
-        <p>No records found</p>
+        <p>کوئی ریکارڈ نہیں ملا</p>
       </div>
     );
   }
@@ -56,18 +56,18 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
       <table className="records-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Student Name</th>
-            <th>Father Name</th>
-            <th>Admission Type</th>
-            <th>Gender</th>
-            <th>Department</th>
-            <th>Education Type</th>
-            <th>Date of Birth</th>
-            <th>CNIC</th>
-            <th>Phone</th>
-            <th>Submitted At</th>
-            <th>Actions</th>
+            <th>آئی ڈی</th>
+            <th>طالب علم کا نام</th>
+            <th>والد کا نام</th>
+            <th>داخلہ کی قسم</th>
+            <th>جنس</th>
+            <th>شعبہ</th>
+            <th>تعلیم کی قسم</th>
+            <th>تاریخ پیدائش</th>
+            <th>شناختی کارڈ</th>
+            <th>فون</th>
+            <th>جمع کرانے کا وقت</th>
+            <th>اقدامات</th>
           </tr>
         </thead>
         <tbody>
@@ -83,12 +83,12 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               <td>{record.fatherName}</td>
               <td>
                 <span className={`badge badge-${record.admissionType === 'نیا داخلہ' ? 'new' : 'existing'}`}>
-                  {record.admissionType === 'نیا داخلہ' ? 'New' : 'Existing'}
+                  {record.admissionType === 'نیا داخلہ' ? 'نیا' : 'پرانا'}
                 </span>
               </td>
               <td>{record.gender}</td>
               <td>{record.department}</td>
-              <td>{record.educationType || 'N/A'}</td>
+              <td>{record.educationType || 'غیر متعین'}</td>
               <td>{formatDate(record.dob)}</td>
               <td>{record.cnic}</td>
               <td>{record.phone}</td>

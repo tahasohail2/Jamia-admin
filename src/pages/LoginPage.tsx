@@ -19,13 +19,13 @@ const LoginPage: React.FC = () => {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <h1>Admin Panel</h1>
-            <p>Student Admission Management System</p>
+            <h1>ایڈمن پینل</h1>
+            <p>طلبہ داخلہ مینجمنٹ سسٹم</p>
           </div>
           <LoginForm />
           <div className="login-footer">
             <p className="login-note">
-              Default credentials: <strong>admin</strong> / <strong>admin123</strong>
+              ڈیفالٹ اسناد: <strong>admin</strong> / <strong>admin123</strong>
             </p>
           </div>
         </div>

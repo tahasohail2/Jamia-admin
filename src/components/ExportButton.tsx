@@ -14,7 +14,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      showToast('Preparing export...', 'info');
+      showToast('ایکسپورٹ تیار ہو رہا ہے...', 'info');
 
       const csvData = await adminApi.exportRecords(filters);
 
@@ -33,10 +33,10 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
       
       URL.revokeObjectURL(url);
 
-      showToast('Records exported successfully', 'success');
+      showToast('ریکارڈز کامیابی سے ایکسپورٹ ہو گئے', 'success');
     } catch (error) {
       console.error('Export failed:', error);
-      showToast('Failed to export records', 'error');
+      showToast('ریکارڈز ایکسپورٹ نہیں ہو سکے', 'error');
     } finally {
       setIsExporting(false);
     }
@@ -52,11 +52,11 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
       {isExporting ? (
         <>
           <span className="spinner-small"></span>
-          Exporting...
+          ایکسپورٹ ہو رہا ہے...
         </>
       ) : (
         <>
-          📥 Export CSV
+          📥 CSV ایکسپورٹ
         </>
       )}
     </button>

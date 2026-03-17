@@ -45,7 +45,7 @@ const DashboardPage: React.FC = () => {
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
-      showToast('Logout failed', 'error');
+      showToast('لاگ آؤٹ ناکام ہوا', 'error');
     }
   };
 
@@ -57,7 +57,7 @@ const DashboardPage: React.FC = () => {
       setIsDetailModalOpen(true);
     } catch (error) {
       console.error('Failed to fetch record details:', error);
-      showToast('Failed to load record details', 'error');
+      showToast('ریکارڈ کی تفصیل لوڈ نہیں ہو سکی', 'error');
     }
   };
 
@@ -75,7 +75,7 @@ const DashboardPage: React.FC = () => {
       setIsDeleting(true);
       await adminApi.deleteRecord(recordToDelete.id);
       
-      showToast(`Record for ${recordToDelete.studentName} deleted successfully`, 'success');
+      showToast(`${recordToDelete.studentName} کا ریکارڈ کامیابی سے حذف ہو گیا`, 'success');
       setIsDeleteDialogOpen(false);
       setRecordToDelete(null);
       
@@ -83,7 +83,7 @@ const DashboardPage: React.FC = () => {
       refresh();
     } catch (error) {
       console.error('Failed to delete record:', error);
-      showToast('Failed to delete record', 'error');
+      showToast('ریکارڈ حذف نہیں ہو سکا', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -107,16 +107,16 @@ const DashboardPage: React.FC = () => {
       <header className="dashboard-header">
         <div className="header-content">
           <div className="header-left">
-            <h1>Admin Dashboard</h1>
-            <p className="header-subtitle">Student Admission Records</p>
+            <h1>ایڈمن ڈیش بورڈ</h1>
+            <p className="header-subtitle">طلبہ داخلہ ریکارڈز</p>
           </div>
           <div className="header-center">
             <img src="/logoHeader.png" alt="Logo" className="header-logo" />
           </div>
           <div className="header-right">
-            <span className="user-info">Welcome, {user?.username}</span>
+            <span className="user-info">خوش آمدید، {user?.username}</span>
             <button className="btn btn-secondary" onClick={handleLogout}>
-              Logout
+              لاگ آؤٹ
             </button>
           </div>
         </div>
@@ -139,7 +139,7 @@ const DashboardPage: React.FC = () => {
             <div className="error-banner">
               <p>{error}</p>
               <button className="btn btn-primary" onClick={refresh}>
-                Retry
+                دوبارہ کوشش کریں
               </button>
             </div>
           )}

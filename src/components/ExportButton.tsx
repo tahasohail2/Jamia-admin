@@ -18,8 +18,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
 
       const csvData = await adminApi.exportRecords(filters);
 
-      // Create blob from CSV string and trigger download
-      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      // Create blob with UTF-8 BOM so spreadsheet apps correctly read Urdu text
+      const blob = new Blob(['\uFEFF', csvData], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       

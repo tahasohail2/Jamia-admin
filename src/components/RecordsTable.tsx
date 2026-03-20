@@ -56,7 +56,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
           <tr>
             <th>طالب علم کا نام</th>
             <th>والد کا نام</th>
-            <th>رجسٹریشن نمبر</th>
+            <th>داخلہ نمبر</th>
             <th>داخلہ کی قسم</th>
             <th>جنس</th>
             <th>شعبہ</th>

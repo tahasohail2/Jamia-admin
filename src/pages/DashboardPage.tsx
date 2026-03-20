@@ -108,7 +108,7 @@ const DashboardPage: React.FC = () => {
         <div className="header-content">
           <div className="header-left">
             <h1>ایڈمن ڈیش بورڈ</h1>
-            <p className="header-subtitle">طلبہ داخلہ ریکارڈز</p>
+            <p className="header-subtitle"> داخلہ ریکارڈز</p>
           </div>
           <div className="header-center">
             <img src="/1.png" alt="Logo" className="header-logo" />

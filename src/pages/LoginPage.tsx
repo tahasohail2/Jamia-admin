@@ -129,7 +129,7 @@ const LoginPage: React.FC = () => {
         <div className="login-panel-content">
           <img src="/1.png" alt="Logo" className="login-panel-logo" />
           <h1 className="login-panel-title">ایڈمن پینل</h1>
-          <p className="login-panel-subtitle">طلبہ داخلہ مینجمنٹ سسٹم</p>
+          <p className="login-panel-subtitle"> داخلہ مینجمنٹ سسٹم</p>
           <div className="login-panel-divider" />
 
           <div className="login-panel-badges">
@@ -219,7 +219,7 @@ const LoginPage: React.FC = () => {
               {isLoading ? (
                 <>
                   <span className="login-spinner" />
-                  لاگ ان ہو رہا ہے...
+                  <span>لاگ ان ہو رہا ہے...</span>
                 </>
               ) : (
                 'لاگ ان'

@@ -74,10 +74,9 @@
 
 .login-panel-title {
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 400;
   color: white;
   margin-bottom: 12px;
-  letter-spacing: 0.5px;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
@@ -323,10 +322,19 @@
   border-top-color: white;
   border-radius: 50%;
   animation: loginSpin 0.7s linear infinite;
+  margin-left: 8px;
 }
 
 @keyframes loginSpin {
   to { transform: rotate(360deg); }
+}
+
+/* Loading text styling */
+.login-btn span:not(.login-spinner) {
+  font-size: 20px;
+  letter-spacing: 3px;
+  line-height: 1.8;
+  font-weight: 500;
 }
 
 /* Bottom copyright */

@@ -140,7 +140,7 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
               ) : (
                 <>
                   <div className="detail-item">
-                    <span className="detail-label">رجسٹریشن نمبر:</span>
+                    <span className="detail-label">داخلہ نمبر:</span>
                     <span className="detail-value">{record.registrationNo || 'غیر متعین'}</span>
                   </div>
                   <div className="detail-item">
@@ -151,18 +151,7 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
                     <span className="detail-label">اگلے سال کی جماعت:</span>
                     <span className="detail-value">{record.nextYearGrade || 'غیر متعین'}</span>
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">امتحان حصہ اول نمبر:</span>
-                    <span className="detail-value">{record.examPart1Marks || 'غیر متعین'}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">امتحان حصہ دوم نمبر:</span>
-                    <span className="detail-value">{record.examPart2Marks || 'غیر متعین'}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">کل نمبر:</span>
-                    <span className="detail-value">{record.totalMarks || 'غیر متعین'}</span>
-                  </div>
+                 
                 </>
               )}
 

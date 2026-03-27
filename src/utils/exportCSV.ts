@@ -1,5 +1,13 @@
 import type { StudentRecord } from '../types';
 
+function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
+  // Get the date string and remove everything from " GMT" onwards
+  const fullDateStr = date.toString();
+  const cleanDate = fullDateStr.split(' GMT')[0];
+  return cleanDate;
+}
+
 export function convertToCSV(records: StudentRecord[]): string {
   if (records.length === 0) {
     return '';
@@ -30,7 +38,7 @@ export function convertToCSV(records: StudentRecord[]): string {
     record.dob,
     record.cnic,
     record.phone,
-    record.submittedAt,
+    `'${formatDateTime(record.submittedAt)}`,
   ]);
 
   // Combine headers and rows

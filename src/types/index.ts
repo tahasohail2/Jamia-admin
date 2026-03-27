@@ -12,6 +12,7 @@ export interface StudentRecord {
   educationType: string;
   registrationNo: string;
   submittedAt: string;
+  approvalStatus?: 'approved' | 'disapproved' | null;
 }
 
 export interface FullStudentRecord extends StudentRecord {

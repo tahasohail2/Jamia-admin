@@ -91,6 +91,17 @@ class AdminApi {
     }
   }
 
+  async updateApprovalStatus(id: number, status: 'approved' | 'disapproved'): Promise<void> {
+    try {
+      await axiosInstance.patch(`/api/admin/records/${id}/approval`, { approvalStatus: status });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to update approval status');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
   async exportRecords(filters: RecordFilters = {}): Promise<string> {
     try {
       const params = new URLSearchParams();

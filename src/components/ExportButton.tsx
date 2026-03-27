@@ -18,8 +18,64 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
 
       const csvData = await adminApi.exportRecords(filters);
 
+      // Process CSV to clean up date format and remove unwanted columns
+      const lines = csvData.split('\n');
+      const processedLines: string[] = [];
+      
+      let columnsToRemove: number[] = [];
+      
+      lines.forEach((line, index) => {
+        if (!line.trim()) return; // Skip empty lines
+        
+        // Parse CSV line (handle quoted values)
+        const columns: string[] = [];
+        let currentColumn = '';
+        let insideQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          
+          if (char === '"') {
+            insideQuotes = !insideQuotes;
+            currentColumn += char;
+          } else if (char === ',' && !insideQuotes) {
+            columns.push(currentColumn);
+            currentColumn = '';
+          } else {
+            currentColumn += char;
+          }
+        }
+        columns.push(currentColumn); // Add last column
+        
+        // Process header row to find columns to remove
+        if (index === 0) {
+          columnsToRemove = [];
+          columns.forEach((col, idx) => {
+            const cleanCol = col.replace(/"/g, '').toLowerCase();
+            if (cleanCol === 'exampart1marks' || cleanCol === 'exampart2marks' || cleanCol === 'totalmarks') {
+              columnsToRemove.push(idx);
+            }
+          });
+        }
+        
+        // Filter out unwanted columns
+        const filteredColumns = columns.filter((_, idx) => !columnsToRemove.includes(idx));
+        
+        // Clean up date format in remaining columns (only for data rows)
+        if (index > 0) {
+          const cleanedColumns = filteredColumns.map(col => 
+            col.replace(/GMT\+\d{4} \(Coordinated Universal Time\)/g, '')
+          );
+          processedLines.push(cleanedColumns.join(','));
+        } else {
+          processedLines.push(filteredColumns.join(','));
+        }
+      });
+      
+      const cleanedCsvData = processedLines.join('\n');
+
       // Create blob with UTF-8 BOM so spreadsheet apps correctly read Urdu text
-      const blob = new Blob(['\uFEFF', csvData], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob(['\uFEFF', cleanedCsvData], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       

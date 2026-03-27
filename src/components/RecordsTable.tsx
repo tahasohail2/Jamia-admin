@@ -6,6 +6,7 @@ interface RecordsTableProps {
   isLoading: boolean;
   onRecordClick: (record: StudentRecord) => void;
   onDeleteClick: (record: StudentRecord) => void;
+  onApprovalChange: (recordId: number, status: 'approved' | 'disapproved') => void;
 }
 
 const RecordsTable: React.FC<RecordsTableProps> = ({
@@ -13,6 +14,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
   isLoading,
   onRecordClick,
   onDeleteClick,
+  onApprovalChange,
 }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -54,17 +56,18 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
       <table className="records-table">
         <thead>
           <tr>
+            <th>داخلہ نمبر</th>
             <th>طالب علم کا نام</th>
             <th>والد کا نام</th>
-            <th>داخلہ نمبر</th>
             <th>داخلہ کی قسم</th>
-            <th>جنس</th>
+            <th className="gender-col">جنس</th>
             <th>شعبہ</th>
-            <th>تعلیم کی قسم</th>
+            <th className="education-type-col">تعلیم کی قسم</th>
             <th>تاریخ پیدائش</th>
             <th>شناختی کارڈ</th>
             <th>فون</th>
             <th>جمع کرانے کا وقت</th>
+            <th>اسٹیٹس</th>
             <th>اقدامات</th>
           </tr>
         </thead>
@@ -76,21 +79,39 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               onClick={() => onRecordClick(record)}
               style={{ cursor: 'pointer' }}
             >
+              <td>{record.registrationNo || 'غیر متعین'}</td>
               <td>{record.studentName}</td>
               <td>{record.fatherName}</td>
-              <td>{record.registrationNo || 'غیر متعین'}</td>
               <td>
                 <span className={`badge badge-${record.admissionType === 'نیا داخلہ' ? 'new' : 'existing'}`}>
                   {record.admissionType === 'نیا داخلہ' ? 'نیا' : 'پرانا'}
                 </span>
               </td>
-              <td>{record.gender}</td>
+              <td className="gender-col">{record.gender}</td>
               <td>{record.department}</td>
-              <td>{record.educationType || 'غیر متعین'}</td>
+              <td className="education-type-col">{record.educationType || 'غیر متعین'}</td>
               <td>{formatDate(record.dob)}</td>
               <td>{record.cnic}</td>
               <td>{record.phone}</td>
               <td>{formatDateTime(record.submittedAt)}</td>
+              <td>
+                <select
+                  className={`approval-dropdown ${record.approvalStatus || ''}`}
+                  value={record.approvalStatus || ''}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    const value = e.target.value as 'approved' | 'disapproved';
+                    if (value) {
+                      onApprovalChange(record.id, value);
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <option value="">اسٹیٹس منتخب کریں</option>
+                  <option value="approved">منظور</option>
+                  <option value="disapproved">مسترد</option>
+                </select>
+              </td>
               <td>
                 <button
                   className="btn-delete-small"
@@ -100,7 +121,8 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
                   }}
                   aria-label={`Delete record for ${record.studentName}`}
                 >
-                  🗑️
+                  <span className="delete-icon">🗑️</span>
+                  <span className="delete-text">حذف</span>
                 </button>
               </td>
             </tr>

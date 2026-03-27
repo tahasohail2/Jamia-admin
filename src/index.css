@@ -119,7 +119,11 @@ body {
 
 /* Table */
 .table-container {
+  width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 table {
@@ -573,6 +577,7 @@ tr:hover {
 /* Records Table */
 .records-table {
   width: 100%;
+  min-width: 1200px;
   border-collapse: collapse;
   background: white;
   border-radius: 8px;
@@ -591,12 +596,31 @@ tr:hover {
   font-weight: 600;
   font-size: 14px;
   border-bottom: none;
+  white-space: nowrap;
 }
 
 .records-table td {
   padding: 12px;
   border-bottom: 1px solid var(--border-color);
-  font-size: 16px;
+  font-size: 14px;
+}
+
+/* Limit education type column width and wrap text */
+.records-table th.education-type-col,
+.records-table td.education-type-col {
+  max-width: 120px;
+  min-width: 100px;
+  width: 120px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+
+/* Hide gender column */
+.records-table th.gender-col,
+.records-table td.gender-col {
+  display: none;
 }
 
 .records-table tbody tr:hover {
@@ -649,13 +673,70 @@ tr:hover {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
   padding: 4px 8px;
   transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-delete-small .delete-icon {
+  font-size: 18px;
+}
+
+.btn-delete-small .delete-text {
+  font-size: 13px;
+  color: #dc3545;
+  font-weight: 600;
 }
 
 .btn-delete-small:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
+}
+
+.btn-delete-small:hover .delete-text {
+  color: #c82333;
+}
+
+/* Approval dropdown styling */
+.approval-dropdown {
+  padding: 4px 8px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  min-width: 100px;
+  max-width: 110px;
+}
+
+.approval-dropdown:hover {
+  border-color: #999;
+}
+
+.approval-dropdown.approved {
+  background-color: #d4edda;
+  border-color: #28a745;
+  color: #155724;
+}
+
+.approval-dropdown.disapproved {
+  background-color: #f8d7da;
+  border-color: #dc3545;
+  color: #721c24;
+}
+
+.approval-dropdown option[value="approved"] {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.approval-dropdown option[value="disapproved"] {
+  color: #dc3545;
+  font-weight: 600;
 }
 
 /* Responsive Table */
@@ -1019,7 +1100,7 @@ tr:hover {
 
   .header-left,
   .header-right {
-    width: 100%;
+    width: 32%;
   }
 
   .header-right {

@@ -1,187 +1,262 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useRecords } from '../hooks/useRecords';
-import { useToast } from '../context/ToastContext';
+import React, { useState, useEffect } from 'react';
+import DashboardLayout from '../components/DashboardLayout';
 import { adminApi } from '../services/adminApi';
-import { StudentRecord, FullStudentRecord } from '../types';
-import SearchBar from '../components/SearchBar';
-import FilterPanel from '../components/FilterPanel';
-import ExportButton from '../components/ExportButton';
-import RecordsTable from '../components/RecordsTable';
-import Pagination from '../components/Pagination';
-import RecordDetailModal from '../components/RecordDetailModal';
-import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
+import '../styles/Dashboard.css';
+
+interface DashboardStats {
+  totalEntries: number;
+  approvedEntries: number;
+  disapprovedEntries: number;
+  pendingEntries: number;
+  recentEntries: Array<{ date: string; count: number }>;
+}
 
 const DashboardPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const { showToast } = useToast();
-  const {
-    records,
-    isLoading,
-    error,
-    filters,
-    currentPage,
-    totalPages,
-    totalRecords,
-    pageSize,
-    handleSearch,
-    handleFilterChange,
-    handlePageChange,
-    refresh,
-  } = useRecords();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalEntries: 0,
+    approvedEntries: 0,
+    disapprovedEntries: 0,
+    pendingEntries: 0,
+    recentEntries: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [selectedRecord, setSelectedRecord] = useState<FullStudentRecord | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [recordToDelete, setRecordToDelete] = useState<StudentRecord | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
 
-  // Handle logout
-  const handleLogout = async () => {
+  const fetchDashboardStats = async () => {
     try {
-      await logout();
-      navigate('/');
+      setIsLoading(true);
+      // Fetch all records to calculate stats
+      const response = await adminApi.getRecords({ pageSize: 1000 });
+      const records = response.data;
+
+      const approved = records.filter(r => r.approvalStatus === 'approved').length;
+      const disapproved = records.filter(r => r.approvalStatus === 'disapproved').length;
+      const pending = records.filter(r => !r.approvalStatus).length;
+
+      // Calculate entries by date (last 7 days)
+      const dateMap = new Map<string, number>();
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (6 - i));
+        return date.toISOString().split('T')[0];
+      });
+
+      last7Days.forEach(date => dateMap.set(date, 0));
+
+      records.forEach(record => {
+        const date = new Date(record.submittedAt).toISOString().split('T')[0];
+        if (dateMap.has(date)) {
+          dateMap.set(date, (dateMap.get(date) || 0) + 1);
+        }
+      });
+
+      const recentEntries = Array.from(dateMap.entries()).map(([date, count]) => ({
+        date,
+        count,
+      }));
+
+      setStats({
+        totalEntries: records.length,
+        approvedEntries: approved,
+        disapprovedEntries: disapproved,
+        pendingEntries: pending,
+        recentEntries,
+      });
     } catch (error) {
-      console.error('Logout failed:', error);
-      showToast('لاگ آؤٹ ناکام ہوا', 'error');
-    }
-  };
-
-  // Handle record click to view details
-  const handleRecordClick = async (record: StudentRecord) => {
-    try {
-      const fullRecord = await adminApi.getRecordById(record.id);
-      setSelectedRecord(fullRecord);
-      setIsDetailModalOpen(true);
-    } catch (error) {
-      console.error('Failed to fetch record details:', error);
-      showToast('ریکارڈ کی تفصیل لوڈ نہیں ہو سکی', 'error');
-    }
-  };
-
-  // Handle delete button click
-  const handleDeleteClick = (record: StudentRecord) => {
-    setRecordToDelete(record);
-    setIsDeleteDialogOpen(true);
-  };
-
-  // Handle delete confirmation
-  const handleDeleteConfirm = async () => {
-    if (!recordToDelete) return;
-
-    try {
-      setIsDeleting(true);
-      await adminApi.deleteRecord(recordToDelete.id);
-      
-      showToast(`${recordToDelete.studentName} کا ریکارڈ کامیابی سے حذف ہو گیا`, 'success');
-      setIsDeleteDialogOpen(false);
-      setRecordToDelete(null);
-      
-      // Refresh the records list
-      refresh();
-    } catch (error) {
-      console.error('Failed to delete record:', error);
-      showToast('ریکارڈ حذف نہیں ہو سکا', 'error');
+      console.error('Failed to fetch dashboard stats:', error);
     } finally {
-      setIsDeleting(false);
+      setIsLoading(false);
     }
   };
 
-  // Handle delete cancel
-  const handleDeleteCancel = () => {
-    setIsDeleteDialogOpen(false);
-    setRecordToDelete(null);
-  };
+  const approvalPercentage = stats.totalEntries > 0
+    ? Math.round((stats.approvedEntries / stats.totalEntries) * 100)
+    : 0;
 
-  // Handle detail modal close
-  const handleDetailModalClose = () => {
-    setIsDetailModalOpen(false);
-    setSelectedRecord(null);
-  };
+  const disapprovalPercentage = stats.totalEntries > 0
+    ? Math.round((stats.disapprovedEntries / stats.totalEntries) * 100)
+    : 0;
+
+  const maxCount = Math.max(...stats.recentEntries.map(e => e.count), 1);
 
   return (
-    <div className="dashboard-page">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1>ایڈمن ڈیش بورڈ</h1>
-            <p className="header-subtitle"> داخلہ ریکارڈز</p>
-          </div>
-          <div className="header-center">
-            <img src="/1.png" alt="Logo" className="header-logo" />
-          </div>
-          <div className="header-right">
-            <span className="user-info">خوش آمدید، {user?.username}</span>
-            <button className="btn btn-secondary" onClick={handleLogout}>
-              لاگ آؤٹ
-            </button>
-          </div>
+    <DashboardLayout>
+      <div className="dashboard-page">
+        <div className="dashboard-header">
+          <h2 className="dashboard-title">ڈیش بورڈ</h2>
+          <p className="dashboard-subtitle">تجزیاتی جائزہ</p>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="dashboard-main">
-        <div className="dashboard-container">
-          {/* Controls Section */}
-          <div className="dashboard-controls">
-            <div className="controls-row">
-              <SearchBar onSearch={handleSearch} />
-              <ExportButton filters={filters} />
-            </div>
-            <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
+        {isLoading ? (
+          <div className="dashboard-loading">
+            <div className="spinner"></div>
+            <p>ڈیٹا لوڈ ہو رہا ہے...</p>
           </div>
+        ) : (
+          <>
+            {/* KPI Cards */}
+            <div className="kpi-grid">
+              <div className="kpi-card">
+                <div className="kpi-icon total">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <div className="kpi-content">
+                  <p className="kpi-label">کل اندراجات</p>
+                  <h3 className="kpi-value">{stats.totalEntries}</h3>
+                </div>
+              </div>
 
-          {/* Error Display */}
-          {error && (
-            <div className="error-banner">
-              <p>{error}</p>
-              <button className="btn btn-primary" onClick={refresh}>
-                دوبارہ کوشش کریں
-              </button>
+              <div className="kpi-card">
+                <div className="kpi-icon approved">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                </div>
+                <div className="kpi-content">
+                  <p className="kpi-label">منظور شدہ</p>
+                  <h3 className="kpi-value">{stats.approvedEntries}</h3>
+                  <span className="kpi-badge approved">{approvalPercentage}%</span>
+                </div>
+              </div>
+
+              <div className="kpi-card">
+                <div className="kpi-icon disapproved">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                </div>
+                <div className="kpi-content">
+                  <p className="kpi-label">مسترد شدہ</p>
+                  <h3 className="kpi-value">{stats.disapprovedEntries}</h3>
+                  <span className="kpi-badge disapproved">{disapprovalPercentage}%</span>
+                </div>
+              </div>
+
+              <div className="kpi-card">
+                <div className="kpi-icon pending">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <div className="kpi-content">
+                  <p className="kpi-label">زیر التواء</p>
+                  <h3 className="kpi-value">{stats.pendingEntries}</h3>
+                </div>
+              </div>
             </div>
-          )}
 
-          {/* Records Table */}
-          <div className="dashboard-content">
-            <RecordsTable
-              records={records}
-              isLoading={isLoading}
-              onRecordClick={handleRecordClick}
-              onDeleteClick={handleDeleteClick}
-            />
-          </div>
+            {/* Charts Section */}
+            <div className="charts-grid">
+              {/* Bar Chart - Entries Over Time */}
+              <div className="chart-card">
+                <div className="chart-header">
+                  <h3 className="chart-title">حالیہ اندراجات</h3>
+                  <p className="chart-subtitle">آخری 7 دن</p>
+                </div>
+                <div className="chart-content">
+                  <div className="bar-chart">
+                    {stats.recentEntries.map((entry, index) => {
+                      const height = (entry.count / maxCount) * 100;
+                      const date = new Date(entry.date);
+                      const dayName = date.toLocaleDateString('ur-PK', { weekday: 'short' });
+                      
+                      return (
+                        <div key={index} className="bar-item">
+                          <div className="bar-wrapper">
+                            <div 
+                              className="bar" 
+                              style={{ height: `${height}%` }}
+                              title={`${entry.count} entries`}
+                            >
+                              <span className="bar-value">{entry.count}</span>
+                            </div>
+                          </div>
+                          <span className="bar-label">{dayName}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
 
-          {/* Pagination */}
-          {!isLoading && !error && records.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalRecords={totalRecords}
-              pageSize={pageSize}
-              onPageChange={handlePageChange}
-            />
-          )}
-        </div>
-      </main>
-
-      {/* Modals */}
-      <RecordDetailModal
-        isOpen={isDetailModalOpen}
-        record={selectedRecord}
-        onClose={handleDetailModalClose}
-      />
-
-      <DeleteConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        studentName={recordToDelete?.studentName || ''}
-        isDeleting={isDeleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-      />
-    </div>
+              {/* Donut Chart - Approval Status */}
+              <div className="chart-card">
+                <div className="chart-header">
+                  <h3 className="chart-title">منظوری کی شرح</h3>
+                  <p className="chart-subtitle">کل اندراجات کا تناسب</p>
+                </div>
+                <div className="chart-content">
+                  <div className="donut-chart">
+                    <svg viewBox="0 0 200 200" className="donut-svg">
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="80"
+                        fill="none"
+                        stroke="#e0e0e0"
+                        strokeWidth="30"
+                      />
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="80"
+                        fill="none"
+                        stroke="#28a745"
+                        strokeWidth="30"
+                        strokeDasharray={`${approvalPercentage * 5.03} 503`}
+                        strokeDashoffset="0"
+                        transform="rotate(-90 100 100)"
+                      />
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="80"
+                        fill="none"
+                        stroke="#dc3545"
+                        strokeWidth="30"
+                        strokeDasharray={`${disapprovalPercentage * 5.03} 503`}
+                        strokeDashoffset={`-${approvalPercentage * 5.03}`}
+                        transform="rotate(-90 100 100)"
+                      />
+                    </svg>
+                    <div className="donut-center">
+                      <span className="donut-total">{stats.totalEntries}</span>
+                      <span className="donut-label">کل</span>
+                    </div>
+                  </div>
+                  <div className="donut-legend">
+                    <div className="legend-item">
+                      <span className="legend-dot approved"></span>
+                      <span className="legend-label">منظور شدہ ({stats.approvedEntries})</span>
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-dot disapproved"></span>
+                      <span className="legend-label">مسترد شدہ ({stats.disapprovedEntries})</span>
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-dot pending"></span>
+                      <span className="legend-label">زیر التواء ({stats.pendingEntries})</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </DashboardLayout>
   );
 };
 

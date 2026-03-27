@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import ResultsPage from './pages/ResultsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ToastContainer from './components/ToastContainer';
 
@@ -22,6 +23,18 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/results"
+              element={
+                <ProtectedRoute>
+                  <ResultsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Redirect old dashboard route */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
           <ToastContainer />
         </Router>

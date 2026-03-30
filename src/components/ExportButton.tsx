@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import * as XLSX from 'xlsx';
 import { adminApi } from '../services/adminApi';
 import { RecordFilters } from '../types';
 import { useToast } from '../context/ToastContext';
@@ -20,7 +21,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
 
       // Process CSV to clean up date format and remove unwanted columns
       const lines = csvData.split('\n');
-      const processedLines: string[] = [];
+      const processedData: string[][] = [];
       
       let columnsToRemove: number[] = [];
       
@@ -37,21 +38,20 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
           
           if (char === '"') {
             insideQuotes = !insideQuotes;
-            currentColumn += char;
           } else if (char === ',' && !insideQuotes) {
-            columns.push(currentColumn);
+            columns.push(currentColumn.replace(/^"|"$/g, '')); // Remove surrounding quotes
             currentColumn = '';
           } else {
             currentColumn += char;
           }
         }
-        columns.push(currentColumn); // Add last column
+        columns.push(currentColumn.replace(/^"|"$/g, '')); // Add last column
         
         // Process header row to find columns to remove
         if (index === 0) {
           columnsToRemove = [];
           columns.forEach((col, idx) => {
-            const cleanCol = col.replace(/"/g, '').toLowerCase();
+            const cleanCol = col.toLowerCase();
             if (cleanCol === 'exampart1marks' || cleanCol === 'exampart2marks' || cleanCol === 'totalmarks') {
               columnsToRemove.push(idx);
             }
@@ -64,30 +64,21 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
         // Clean up date format in remaining columns (only for data rows)
         if (index > 0) {
           const cleanedColumns = filteredColumns.map(col => 
-            col.replace(/GMT\+\d{4} \(Coordinated Universal Time\)/g, '')
+            col.replace(/GMT\+\d{4} \(Coordinated Universal Time\)/g, '').trim()
           );
-          processedLines.push(cleanedColumns.join(','));
+          processedData.push(cleanedColumns);
         } else {
-          processedLines.push(filteredColumns.join(','));
+          processedData.push(filteredColumns);
         }
       });
-      
-      const cleanedCsvData = processedLines.join('\n');
 
-      // Create blob with UTF-8 BOM so spreadsheet apps correctly read Urdu text
-      const blob = new Blob(['\uFEFF', cleanedCsvData], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `student-records-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      URL.revokeObjectURL(url);
+      // Create workbook and worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(processedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Student Records');
+
+      // Generate Excel file and download
+      XLSX.writeFile(workbook, `student-records-${new Date().toISOString().split('T')[0]}.xlsx`);
 
       showToast('ریکارڈز کامیابی سے ایکسپورٹ ہو گئے', 'success');
     } catch (error) {
@@ -103,7 +94,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
       className="btn btn-export"
       onClick={handleExport}
       disabled={isExporting}
-      aria-label="Export records to CSV"
+      aria-label="Export records to Excel"
     >
       {isExporting ? (
         <>
@@ -112,7 +103,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({ filters }) => {
         </>
       ) : (
         <>
-          📥 CSV ایکسپورٹ
+          📥 Excel ایکسپورٹ
         </>
       )}
     </button>

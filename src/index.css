@@ -1243,3 +1243,24 @@ tr:hover {
   justify-content: center;
   gap: 8px;
 }
+
+/* Limit name column widths to prevent CNIC wrapping */
+.records-table th:nth-child(2),
+.records-table td:nth-child(2),
+.records-table th:nth-child(3),
+.records-table td:nth-child(3) {
+  max-width: 140px;
+  min-width: 120px;
+  width: 140px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+
+/* Ensure CNIC column stays on one line */
+.records-table th:nth-child(9),
+.records-table td:nth-child(9) {
+  white-space: nowrap;
+  min-width: 150px;
+}

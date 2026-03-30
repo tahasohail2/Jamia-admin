@@ -43,6 +43,7 @@ export interface LoginCredentials {
 export interface AuthUser {
   id: number;
   username: string;
+  isSuperAdmin: boolean;
 }
 
 export interface AuthResponse {
@@ -52,6 +53,23 @@ export interface AuthResponse {
 export interface LoginResponse extends AuthResponse {
   success?: boolean;
   token?: string;
+}
+
+// User Management Types
+export interface AdminUser {
+  id: number;
+  username: string;
+  isSuperAdmin: boolean;
+  isActive: boolean;
+  lastLogin: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateUserData {
+  username: string;
+  password: string;
+  isSuperAdmin: boolean;
 }
 
 // API Types

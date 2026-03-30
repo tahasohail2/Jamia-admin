@@ -91,9 +91,11 @@ class AdminApi {
     }
   }
 
-  async updateApprovalStatus(id: number, status: 'approved' | 'disapproved'): Promise<void> {
+  async updateApprovalStatus(id: number, status: 'approved' | 'disapproved' | 'pending' | null): Promise<void> {
     try {
-      await axiosInstance.patch(`/api/admin/records/${id}/approval`, { approvalStatus: status });
+      // Convert null to 'pending' for backend compatibility
+      const statusValue = status === null ? 'pending' : status;
+      await axiosInstance.patch(`/api/admin/records/${id}/approval`, { approvalStatus: statusValue });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Failed to update approval status');

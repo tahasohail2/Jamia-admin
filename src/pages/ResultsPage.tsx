@@ -82,12 +82,14 @@ const ResultsPage: React.FC = () => {
     setRecordToDelete(null);
   };
 
-  // Handle approval status change
-  const handleApprovalChange = async (recordId: number, status: 'approved' | 'disapproved') => {
+  // Handle approval status change (supports approved, disapproved, or null to reset)
+  const handleApprovalChange = async (recordId: number, status: 'approved' | 'disapproved' | 'pending' | null) => {
     try {
       await adminApi.updateApprovalStatus(recordId, status);
       showToast(
-        status === 'approved' ? 'ریکارڈ منظور ہو گیا' : 'ریکارڈ مسترد ہو گیا',
+        status === 'approved' ? 'ریکارڈ منظور ہو گیا' : 
+        status === 'disapproved' ? 'ریکارڈ مسترد ہو گیا' : 
+        'اسٹیٹس ری سیٹ ہو گیا',
         'success'
       );
       // Refresh the records list to show updated status

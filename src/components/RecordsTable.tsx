@@ -6,7 +6,7 @@ interface RecordsTableProps {
   isLoading: boolean;
   onRecordClick: (record: StudentRecord) => void;
   onDeleteClick: (record: StudentRecord) => void;
-  onApprovalChange: (recordId: number, status: 'approved' | 'disapproved') => void;
+  onApprovalChange: (recordId: number, status: 'approved' | 'disapproved' | 'pending' | null) => void;
 }
 
 const RecordsTable: React.FC<RecordsTableProps> = ({
@@ -97,17 +97,16 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               <td>
                 <select
                   className={`approval-dropdown ${record.approvalStatus || ''}`}
-                  value={record.approvalStatus || ''}
+                  value={record.approvalStatus || 'pending'}
                   onChange={(e) => {
                     e.stopPropagation();
-                    const value = e.target.value as 'approved' | 'disapproved';
-                    if (value) {
-                      onApprovalChange(record.id, value);
-                    }
+                    const value = e.target.value;
+                    const status = value === 'pending' ? null : (value as 'approved' | 'disapproved');
+                    onApprovalChange(record.id, status);
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <option value="">اسٹیٹس منتخب کریں</option>
+                  <option value="pending">اسٹیٹس منتخب کریں</option>
                   <option value="approved">منظور</option>
                   <option value="disapproved">مسترد</option>
                 </select>

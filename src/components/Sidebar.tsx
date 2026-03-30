@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
+import ChangePasswordModal from './ChangePasswordModal';
 import '../styles/Sidebar.css';
 
 interface SidebarProps {
@@ -11,8 +12,9 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { showToast } = useToast();
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -81,9 +83,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             </svg>
             {!isCollapsed && <span>داخلہ جات</span>}
           </NavLink>
+
+          {user?.isSuperAdmin && (
+            <NavLink 
+              to="/users" 
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              title="صارفین کا انتظام"
+            >
+              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              {!isCollapsed && <span>صارفین کا انتظام</span>}
+            </NavLink>
+          )}
         </nav>
 
         <div className="sidebar-footer">
+          <button 
+            className="sidebar-profile-btn" 
+            onClick={() => setIsPasswordModalOpen(true)} 
+            title="پروفائل"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            {!isCollapsed && <span>پروفائل</span>}
+          </button>
+          
           <button className="sidebar-logout-btn" onClick={handleLogout} title="لاگ آؤٹ">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -94,6 +124,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           </button>
         </div>
       </aside>
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+      />
     </>
   );
 };

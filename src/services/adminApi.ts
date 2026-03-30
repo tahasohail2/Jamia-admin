@@ -4,6 +4,7 @@ import type {
   FullStudentRecord,
   PaginatedResponse,
   RecordFilters,
+  AdminUser,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -123,6 +124,87 @@ class AdminApi {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error('Failed to export records');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    try {
+      await axiosInstance.post('/api/admin/change-password', {
+        currentPassword,
+        newPassword,
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to change password');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  // User Management APIs (Super Admin Only)
+  async getAllUsers(): Promise<AdminUser[]> {
+    try {
+      const response = await axiosInstance.get('/api/admin/users');
+      return response.data.users;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch users');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async createUser(username: string, password: string, isSuperAdmin: boolean): Promise<AdminUser> {
+    try {
+      const response = await axiosInstance.post('/api/admin/users', {
+        username,
+        password,
+        isSuperAdmin,
+      });
+      return response.data.user;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to create user');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async changeUserPassword(userId: number, newPassword: string): Promise<void> {
+    try {
+      await axiosInstance.post('/api/admin/change-password', {
+        userId,
+        newPassword,
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to change password');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async updateUserStatus(userId: number, isActive: boolean): Promise<void> {
+    try {
+      await axiosInstance.patch(`/api/admin/users/${userId}/status`, {
+        isActive,
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to update user status');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    try {
+      await axiosInstance.delete(`/api/admin/users/${userId}`);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to delete user');
       }
       throw new Error('An unexpected error occurred');
     }

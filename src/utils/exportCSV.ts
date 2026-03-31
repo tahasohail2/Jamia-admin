@@ -13,23 +13,23 @@ export function convertToCSV(records: StudentRecord[]): string {
     return '';
   }
 
-  // Define headers
+  // Define headers in Urdu
   const headers = [
-    'ID',
-    'Student Name',
-    'Father Name',
-    'Admission Type',
-    'Gender',
-    'Department',
-    'Date of Birth',
-    'CNIC',
-    'Phone',
-    'Submitted At',
+    'داخلہ نمبر',
+    'طالب علم کا نام',
+    'والد کا نام',
+    'داخلہ کی قسم',
+    'جنس',
+    'شعبہ',
+    'تاریخ پیدائش',
+    'شناختی کارڈ',
+    'فون',
+    'جمع کرانے کا وقت',
   ];
 
   // Create CSV rows
   const rows = records.map((record) => [
-    record.id,
+    record.registrationNo || 'غیر متعین',
     record.studentName,
     record.fatherName,
     record.admissionType,

@@ -80,6 +80,10 @@ const DashboardPage: React.FC = () => {
     ? Math.round((stats.disapprovedEntries / stats.totalEntries) * 100)
     : 0;
 
+  const pendingPercentage = stats.totalEntries > 0
+    ? Math.round((stats.pendingEntries / stats.totalEntries) * 100)
+    : 0;
+
   const maxCount = Math.max(...stats.recentEntries.map(e => e.count), 1);
 
   return (
@@ -200,6 +204,7 @@ const DashboardPage: React.FC = () => {
                 <div className="chart-content">
                   <div className="donut-chart">
                     <svg viewBox="0 0 200 200" className="donut-svg">
+                      {/* Background circle */}
                       <circle
                         cx="100"
                         cy="100"
@@ -208,6 +213,7 @@ const DashboardPage: React.FC = () => {
                         stroke="#e0e0e0"
                         strokeWidth="30"
                       />
+                      {/* Approved section (green) */}
                       <circle
                         cx="100"
                         cy="100"
@@ -219,6 +225,7 @@ const DashboardPage: React.FC = () => {
                         strokeDashoffset="0"
                         transform="rotate(-90 100 100)"
                       />
+                      {/* Disapproved section (red) */}
                       <circle
                         cx="100"
                         cy="100"
@@ -228,6 +235,18 @@ const DashboardPage: React.FC = () => {
                         strokeWidth="30"
                         strokeDasharray={`${disapprovalPercentage * 5.03} 503`}
                         strokeDashoffset={`-${approvalPercentage * 5.03}`}
+                        transform="rotate(-90 100 100)"
+                      />
+                      {/* Pending section (yellow) */}
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="80"
+                        fill="none"
+                        stroke="#ffc107"
+                        strokeWidth="30"
+                        strokeDasharray={`${pendingPercentage * 5.03} 503`}
+                        strokeDashoffset={`-${(approvalPercentage + disapprovalPercentage) * 5.03}`}
                         transform="rotate(-90 100 100)"
                       />
                     </svg>

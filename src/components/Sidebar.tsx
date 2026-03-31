@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
 import ChangePasswordModal from './ChangePasswordModal';
+import LogoutConfirmDialog from './LogoutConfirmDialog';
 import '../styles/Sidebar.css';
 
 interface SidebarProps {
@@ -15,15 +16,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setIsLogoutDialogOpen(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
     try {
       await logout();
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
       showToast('لاگ آؤٹ ناکام ہوا', 'error');
+      setIsLoggingOut(false);
     }
+  };
+
+  const handleLogoutCancel = () => {
+    setIsLogoutDialogOpen(false);
   };
 
   return (
@@ -102,19 +115,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         </nav>
 
         <div className="sidebar-footer">
-          <button 
-            className="sidebar-profile-btn" 
-            onClick={() => setIsPasswordModalOpen(true)} 
-            title="پروفائل"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            {!isCollapsed && <span>پروفائل</span>}
-          </button>
+          {user?.isSuperAdmin && (
+            <button 
+              className="sidebar-profile-btn" 
+              onClick={() => setIsPasswordModalOpen(true)} 
+              title="پروفائل"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              {!isCollapsed && <span>پروفائل</span>}
+            </button>
+          )}
           
-          <button className="sidebar-logout-btn" onClick={handleLogout} title="لاگ آؤٹ">
+          <button className="sidebar-logout-btn" onClick={handleLogoutClick} title="لاگ آؤٹ">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
@@ -128,6 +143,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
+      />
+
+      <LogoutConfirmDialog
+        isOpen={isLogoutDialogOpen}
+        isLoggingOut={isLoggingOut}
+        onConfirm={handleLogoutConfirm}
+        onCancel={handleLogoutCancel}
       />
     </>
   );

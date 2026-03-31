@@ -141,6 +141,8 @@ const UserManagementPage: React.FC = () => {
                           className={`btn-action ${user.isActive ? 'btn-deactivate' : 'btn-activate'}`}
                           onClick={() => handleToggleStatus(user)}
                           title={user.isActive ? 'غیر فعال کریں' : 'فعال کریں'}
+                          disabled={user.isSuperAdmin}
+                          style={{ opacity: user.isSuperAdmin ? 0.5 : 1, cursor: user.isSuperAdmin ? 'not-allowed' : 'pointer' }}
                         >
                           {user.isActive ? (
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
@@ -158,6 +160,8 @@ const UserManagementPage: React.FC = () => {
                           className="btn-action btn-delete"
                           onClick={() => handleDeleteClick(user)}
                           title="حذف کریں"
+                          disabled={user.isSuperAdmin}
+                          style={{ opacity: user.isSuperAdmin ? 0.5 : 1, cursor: user.isSuperAdmin ? 'not-allowed' : 'pointer' }}
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
                             <polyline points="3 6 5 6 21 6" />

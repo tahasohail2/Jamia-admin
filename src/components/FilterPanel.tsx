@@ -20,6 +20,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
       admissionType: undefined,
       gender: undefined,
       department: undefined,
+      approvalStatus: undefined,
     });
   };
 
@@ -27,6 +28,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
     filters.admissionType,
     filters.gender,
     filters.department,
+    filters.approvalStatus,
   ].filter(Boolean).length;
 
   return (
@@ -85,6 +87,23 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
             <option value="حفظ">حفظ</option>
             <option value="تجوید">تجوید</option>
             <option value="درس نظامی / عالمہ فاضلہ">درس نظامی / عالمہ فاضلہ</option>
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="approvalStatus" className="filter-label">
+            منظوری کی حیثیت
+          </label>
+          <select
+            id="approvalStatus"
+            className="filter-select"
+            value={filters.approvalStatus || ''}
+            onChange={(e) => handleChange('approvalStatus', e.target.value)}
+          >
+            <option value="">سب</option>
+            <option value="approved">منظور شدہ</option>
+            <option value="disapproved">مسترد</option>
+            <option value="pending">زیر التواء</option>
           </select>
         </div>
 

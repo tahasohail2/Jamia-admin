@@ -7,7 +7,7 @@
   height: 100vh;
   min-height: 100vh;
   display: flex;
-  direction: rtl;
+flex-direction: row-reverse;
   overflow: hidden;
   position: fixed;
   top: 0;
@@ -28,6 +28,7 @@
   padding: 60px 40px;
   min-height: 100vh;
   height: 100%;
+  order: 1;
 }
 
 /* SVG geometric pattern overlay */
@@ -160,6 +161,7 @@
   position: relative;
   z-index: 1;
   overflow-y: auto;
+  order: 2;
 }
 
 .login-right-inner {
@@ -281,7 +283,7 @@
 /* Submit button */
 .login-btn {
   width: 100%;
-  padding: 15px;
+  padding: 15px 20px;
   background: linear-gradient(135deg, #058464 0%, #046b52 100%);
   color: white;
   border: none;
@@ -293,10 +295,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   margin-top: 8px;
   box-shadow: 0 4px 16px rgba(5, 132, 100, 0.35);
-  letter-spacing: 0.5px;
+  letter-spacing: normal;
+  direction: rtl;
+  text-align: center;
+  line-height: 1.5;
 }
 
 .login-btn:hover:not(:disabled) {
@@ -322,19 +327,18 @@
   border-top-color: white;
   border-radius: 50%;
   animation: loginSpin 0.7s linear infinite;
-  margin-left: 8px;
+  flex-shrink: 0;
 }
 
 @keyframes loginSpin {
   to { transform: rotate(360deg); }
 }
 
-/* Loading text styling */
-.login-btn span:not(.login-spinner) {
-  font-size: 20px;
-  letter-spacing: 3px;
-  line-height: 1.8;
-  font-weight: 500;
+/* Button text styling */
+.login-btn > span {
+  display: inline-block;
+  white-space: nowrap;
+  letter-spacing: normal;
 }
 
 /* Bottom copyright */
@@ -353,22 +357,46 @@
   }
 
   .login-left-panel {
-    min-height: 260px;
-    padding: 40px 30px;
+    min-height: 120px;
+    padding: 24px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .login-panel-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-align: right;
+    gap: 16px;
   }
 
   .login-panel-logo {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 16px;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 0;
+    order: 1;
+    flex-shrink: 0;
+  }
+
+  .login-panel-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    order: 2;
+    flex: 1;
   }
 
   .login-panel-title {
-    font-size: 26px;
+    font-size: 22px;
+    margin-bottom: 6px;
   }
 
   .login-panel-subtitle {
-    font-size: 15px;
+    font-size: 14px;
     margin-bottom: 0;
   }
 
@@ -382,15 +410,74 @@
     min-width: unset;
     padding: 40px 24px;
     box-shadow: none;
+    min-height: calc(100vh - 120px);
   }
 }
 
 @media (max-width: 480px) {
+  .login-left-panel {
+    padding: 20px;
+    min-height: 110px;
+    width: 392px;
+  }
+
+  .login-panel-content {
+    gap: 12px;
+  }
+
+  .login-panel-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .login-panel-title {
+    font-size: 19px;
+  }
+
+  .login-panel-subtitle {
+    font-size: 13px;
+  }
+
   .login-right-panel {
     padding: 32px 20px;
+    min-height: calc(100vh - 110px);
   }
 
   .login-form-heading {
     font-size: 22px;
   }
+}
+
+/* Password toggle button (eye icon) */
+.login-password-toggle {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+  transition: color 0.3s ease;
+  z-index: 2;
+}
+
+.login-password-toggle:hover {
+  color: var(--primary-color);
+}
+
+.login-password-toggle:focus {
+  outline: none;
+  color: var(--primary-color);
+}
+
+/* Adjust padding for password field to accommodate both icons */
+.login-input-wrapper input[type="password"],
+.login-input-wrapper input[type="text"] {
+  padding-left: 46px;
+  padding-right: 46px;
 }

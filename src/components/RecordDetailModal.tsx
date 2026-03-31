@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FullStudentRecord } from '../types';
 
 interface RecordDetailModalProps {
@@ -12,6 +12,18 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
   record,
   onClose,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen || !record) return null;
 
   const formatDate = (dateString: string) => {

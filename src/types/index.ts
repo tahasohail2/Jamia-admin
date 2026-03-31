@@ -88,6 +88,7 @@ export interface RecordFilters {
   admissionType?: string;
   gender?: string;
   department?: string;
+  approvalStatus?: string;
   page?: number;
   pageSize?: number;
 }

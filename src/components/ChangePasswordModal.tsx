@@ -24,9 +24,18 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
   const isSuperAdmin = user?.isSuperAdmin || false;
 
   useEffect(() => {
-    if (isOpen && isSuperAdmin) {
-      loadUsers();
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      if (isSuperAdmin) {
+        loadUsers();
+      }
+    } else {
+      document.body.style.overflow = 'unset';
     }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen, isSuperAdmin]);
 
   const loadUsers = async () => {

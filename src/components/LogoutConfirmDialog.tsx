@@ -1,17 +1,15 @@
 import React, { useEffect } from 'react';
 
-interface DeleteConfirmDialogProps {
+interface LogoutConfirmDialogProps {
   isOpen: boolean;
-  studentName: string;
-  isDeleting: boolean;
+  isLoggingOut: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
+const LogoutConfirmDialog: React.FC<LogoutConfirmDialogProps> = ({
   isOpen,
-  studentName,
-  isDeleting,
+  isLoggingOut,
   onConfirm,
   onCancel,
 }) => {
@@ -33,12 +31,12 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>حذف کرنے کی تصدیق</h2>
+          <h2>لاگ آؤٹ کی تصدیق</h2>
           <button
             className="modal-close"
             onClick={onCancel}
             aria-label="Close dialog"
-            disabled={isDeleting}
+            disabled={isLoggingOut}
           >
             ×
           </button>
@@ -46,10 +44,10 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
 
         <div className="modal-body">
           <p className="delete-warning">
-            کیا آپ واقعی <strong>{studentName}</strong> کا ریکارڈ حذف کرنا چاہتے ہیں؟
+            کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟
           </p>
           <p className="delete-note">
-            یہ عمل واپس نہیں کیا جا سکتا۔
+            آپ کو دوبارہ لاگ ان کرنا ہوگا۔
           </p>
         </div>
 
@@ -57,22 +55,22 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           <button
             className="btn btn-secondary"
             onClick={onCancel}
-            disabled={isDeleting}
+            disabled={isLoggingOut}
           >
             منسوخ
           </button>
           <button
             className="btn btn-danger"
             onClick={onConfirm}
-            disabled={isDeleting}
+            disabled={isLoggingOut}
           >
-            {isDeleting ? (
+            {isLoggingOut ? (
               <>
                 <span className="spinner-small"></span>
-                حذف ہو رہا ہے...
+                لاگ آؤٹ ہو رہا ہے...
               </>
             ) : (
-              'حذف کریں'
+              'لاگ آؤٹ کریں'
             )}
           </button>
         </div>
@@ -81,4 +79,4 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   );
 };
 
-export default DeleteConfirmDialog;
+export default LogoutConfirmDialog;

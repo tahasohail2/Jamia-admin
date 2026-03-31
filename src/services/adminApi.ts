@@ -49,6 +49,7 @@ class AdminApi {
       if (filters.admissionType) params.append('admissionType', filters.admissionType);
       if (filters.gender) params.append('gender', filters.gender);
       if (filters.department) params.append('department', filters.department);
+      if (filters.approvalStatus) params.append('approvalStatus', filters.approvalStatus);
       if (filters.page) params.append('page', filters.page.toString());
       if (filters.pageSize) params.append('pageSize', filters.pageSize.toString());
 
@@ -113,6 +114,7 @@ class AdminApi {
       if (filters.admissionType) params.append('admissionType', filters.admissionType);
       if (filters.gender) params.append('gender', filters.gender);
       if (filters.department) params.append('department', filters.department);
+      if (filters.approvalStatus) params.append('approvalStatus', filters.approvalStatus);
 
       const response = await axiosInstance.get(
         `/api/admin/records/export?${params.toString()}`,

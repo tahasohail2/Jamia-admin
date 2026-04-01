@@ -63,9 +63,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         <button className="sidebar-toggle" onClick={onToggle} aria-label="Toggle sidebar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {isCollapsed ? (
-              <path d="M9 18l6-6-6-6" />
+               <path d="M15 18l-6-6 6-6" />
+             
             ) : (
-              <path d="M15 18l-6-6 6-6" />
+              <path d="M9 18l6-6-6-6" />
             )}
           </svg>
         </button>

@@ -107,7 +107,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <option value="pending">اسٹیٹس منتخب کریں</option>
-                  <option value="approved">منظور</option>
+                  <option value="approved">منظور شدہ</option>
                   <option value="disapproved">مسترد</option>
                 </select>
               </td>

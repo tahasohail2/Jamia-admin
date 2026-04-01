@@ -1,3 +1,4 @@
+import * as XLSX from 'xlsx-js-style';
 import type { StudentRecord } from '../types';
 
 function formatDateTime(dateString: string): string {
@@ -50,6 +51,79 @@ export function convertToCSV(records: StudentRecord[]): string {
   ].join('\n');
 
   return csvContent;
+}
+
+export function downloadExcel(records: StudentRecord[], filename: string = 'records.xlsx'): void {
+  if (records.length === 0) {
+    return;
+  }
+
+  // Define headers in Urdu
+  const headers = [
+    'داخلہ نمبر',
+    'طالب علم کا نام',
+    'والد کا نام',
+    'داخلہ کی قسم',
+    'جنس',
+    'شعبہ',
+    'تاریخ پیدائش',
+    'شناختی کارڈ',
+    'فون',
+    'جمع کرانے کا وقت',
+  ];
+
+  // Create data rows
+  const rows = records.map((record) => [
+    record.registrationNo || 'غیر متعین',
+    record.studentName,
+    record.fatherName,
+    record.admissionType,
+    record.gender,
+    record.department,
+    record.dob,
+    record.cnic,
+    record.phone,
+    formatDateTime(record.submittedAt),
+  ]);
+
+  // Combine headers and rows
+  const data = [headers, ...rows];
+
+  // Create worksheet
+  const ws = XLSX.utils.aoa_to_sheet(data);
+
+  // Set column widths
+  const colWidths = headers.map(() => ({ wch: 20 }));
+  ws['!cols'] = colWidths;
+
+  // Apply styling to header row (first row)
+  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+  for (let col = range.s.c; col <= range.e.c; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+    if (!ws[cellAddress]) continue;
+    
+    // Apply yellow background and larger font to headers
+    ws[cellAddress].s = {
+      fill: {
+        fgColor: { rgb: 'FFFF00' } // Yellow background
+      },
+      font: {
+        sz: 14, // Font size 14
+        bold: true
+      },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'center'
+      }
+    };
+  }
+
+  // Create workbook and add worksheet
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Records');
+
+  // Write file
+  XLSX.writeFile(wb, filename);
 }
 
 export function downloadCSV(csvContent: string, filename: string = 'records.csv'): void {

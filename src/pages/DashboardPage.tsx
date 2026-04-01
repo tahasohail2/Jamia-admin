@@ -127,8 +127,10 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <div className="kpi-content">
                   <p className="kpi-label">منظور شدہ</p>
-                  <h3 className="kpi-value">{stats.approvedEntries}</h3>
-                  <span className="kpi-badge approved">{approvalPercentage}%</span>
+                  <h3 className="kpi-value">
+                    {stats.approvedEntries}
+                    <span className="kpi-badge approved">{approvalPercentage}%</span>
+                  </h3>
                 </div>
               </div>
 
@@ -142,8 +144,10 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <div className="kpi-content">
                   <p className="kpi-label">مسترد شدہ</p>
-                  <h3 className="kpi-value">{stats.disapprovedEntries}</h3>
-                  <span className="kpi-badge disapproved">{disapprovalPercentage}%</span>
+                  <h3 className="kpi-value">
+                    {stats.disapprovedEntries}
+                    <span className="kpi-badge disapproved">{disapprovalPercentage}%</span>
+                  </h3>
                 </div>
               </div>
 

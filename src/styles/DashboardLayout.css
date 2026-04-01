@@ -1,5 +1,6 @@
 .dashboard-layout {
   display: flex;
+  flex-direction: row-reverse;
   min-height: 100vh;
   background: #f8f9fa;
   overflow-x: hidden;
@@ -7,17 +8,17 @@
 
 .main-content {
   flex: 1;
-  margin-left: 260px;
+  margin-right: 260px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  transition: margin-right 0.3s ease;
   width: calc(100% - 260px);
   max-width: 100vw;
 }
 
 .main-content.sidebar-collapsed {
-  margin-left: 70px;
+  margin-right: 70px;
   width: calc(100% - 70px);
 }
 
@@ -156,12 +157,12 @@
 /* Responsive */
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 0;
+    margin-right: 0;
     width: 100%;
   }
 
   .main-content.sidebar-collapsed {
-    margin-left: 0;
+    margin-right: 0;
     width: 100%;
   }
 

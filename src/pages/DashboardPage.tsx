@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import MigrateButton from '../components/MigrateButton';
 import { adminApi } from '../services/adminApi';
 import '../styles/Dashboard.css';
 
@@ -93,6 +94,8 @@ const DashboardPage: React.FC = () => {
           <h2 className="dashboard-title">ڈیش بورڈ</h2>
           <p className="dashboard-subtitle">تجزیاتی جائزہ</p>
         </div>
+
+        <MigrateButton />
 
         {isLoading ? (
           <div className="dashboard-loading">

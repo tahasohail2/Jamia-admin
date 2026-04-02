@@ -59,15 +59,16 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
             <th>داخلہ نمبر</th>
             <th>طالب علم کا نام</th>
             <th>والد کا نام</th>
-            <th>داخلہ کی قسم</th>
+            <th className="admission-type-col">داخلہ کی قسم</th>
             <th className="gender-col">جنس</th>
-            <th>شعبہ</th>
+            <th className="department-col">شعبہ</th>
             <th className="education-type-col">تعلیم کی قسم</th>
             <th>تاریخ پیدائش</th>
             <th>شناختی کارڈ</th>
             <th>فون</th>
-            <th>جمع کرانے کا وقت</th>
             <th>اسٹیٹس</th>
+            <th>تصویر</th>
+            <th>جمع کرانے کا وقت</th>
             <th>اقدامات</th>
           </tr>
         </thead>
@@ -82,18 +83,17 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               <td>{record.registrationNo || 'غیر متعین'}</td>
               <td>{record.studentName}</td>
               <td>{record.fatherName}</td>
-              <td>
+              <td className="admission-type-col">
                 <span className={`badge badge-${record.admissionType === 'نیا داخلہ' ? 'new' : 'existing'}`}>
                   {record.admissionType === 'نیا داخلہ' ? 'نیا' : 'پرانا'}
                 </span>
               </td>
               <td className="gender-col">{record.gender}</td>
-              <td>{record.department}</td>
+              <td className="department-col">{record.department}</td>
               <td className="education-type-col">{record.educationType || 'غیر متعین'}</td>
               <td>{formatDate(record.dob)}</td>
               <td>{record.cnic}</td>
               <td>{record.phone}</td>
-              <td>{formatDateTime(record.submittedAt)}</td>
               <td>
                 <select
                   className={`approval-dropdown ${record.approvalStatus || ''}`}
@@ -111,6 +111,22 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
                   <option value="disapproved">مسترد</option>
                 </select>
               </td>
+              <td className="picture-cell">
+                {record.additionalUrls && record.additionalUrls.length > 0 ? (
+                  <img 
+                    src={record.additionalUrls[0]} 
+                    alt="Student" 
+                    className="student-picture"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(record.additionalUrls![0], '_blank');
+                    }}
+                  />
+                ) : (
+                  <span className="no-picture">-</span>
+                )}
+              </td>
+              <td>{formatDateTime(record.submittedAt)}</td>
               <td>
                 <button
                   className="btn-delete-small"

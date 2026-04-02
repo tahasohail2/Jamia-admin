@@ -618,6 +618,25 @@ tr:hover {
   line-height: 1.4;
 }
 
+/* Department column styling */
+.records-table th.department-col,
+.records-table td.department-col {
+  min-width: 180px;
+  max-width: 200px;
+  width: 180px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+
+/* Admission type column styling */
+.records-table th.admission-type-col,
+.records-table td.admission-type-col {
+  min-width: 100px;
+  white-space: nowrap;
+}
+
 /* Hide gender column */
 .records-table th.gender-col,
 .records-table td.gender-col {
@@ -1275,4 +1294,32 @@ tr:hover {
 .records-table td:nth-child(9) {
   white-space: nowrap;
   min-width: 150px;
+}
+
+/* Picture Column Styling */
+.picture-cell {
+  text-align: center;
+  padding: 8px !important;
+  vertical-align: middle;
+}
+
+.student-picture {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid #ddd;
+}
+
+.student-picture:hover {
+  transform: scale(1.5);
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.no-picture {
+  color: #999;
+  font-size: 14px;
 }

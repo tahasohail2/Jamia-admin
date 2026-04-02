@@ -212,12 +212,12 @@ const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
               {record.additionalUrls && record.additionalUrls.length > 0 && (
                 <div className="document-group">
-                  <h4>اضافی دستاویزات</h4>
+                  <h4>تصویر</h4>
                   <ul className="document-list">
                     {record.additionalUrls.map((url, index) => (
                       <li key={index}>
                         <a href={url} target="_blank" rel="noopener noreferrer">
-                          📄 اضافی دستاویز {index + 1}
+                          📄 تصویر {index + 1}
                         </a>
                       </li>
                     ))}

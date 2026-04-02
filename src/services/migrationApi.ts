@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const BATCH_SIZE = 5;
 
-const MIGRATION_API_URL = 'https://donovan-subtrihedral-betsey.ngrok-free.dev';
+const MIGRATION_API_URL = import.meta.env.VITE_MIGRATION_API_URL;
 
 interface MigrationRecord {
   originalId: number;

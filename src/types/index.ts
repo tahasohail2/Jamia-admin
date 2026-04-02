@@ -13,6 +13,8 @@ export interface StudentRecord {
   registrationNo: string;
   submittedAt: string;
   approvalStatus?: 'approved' | 'disapproved' | 'pending' | null;
+  pictureUrl?: string;
+  additionalUrls?: string[];
 }
 
 export interface FullStudentRecord extends StudentRecord {
@@ -32,6 +34,7 @@ export interface FullStudentRecord extends StudentRecord {
   certificateUrls?: string[];
   cnicUrls?: string[];
   additionalUrls?: string[];
+  pictureUrl?: string;
 }
 
 // Authentication Types

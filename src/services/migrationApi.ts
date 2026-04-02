@@ -2,13 +2,12 @@ import { adminApi } from './adminApi';
 import type { FullStudentRecord } from '../types';
 import axios from 'axios';
 
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 5;
 
-// TODO: Replace with real API URL when migration backend is ready
-const MIGRATION_API_URL = import.meta.env.VITE_MIGRATION_API_URL;
+const MIGRATION_API_URL = 'https://donovan-subtrihedral-betsey.ngrok-free.dev';
 
 interface MigrationRecord {
-  id: number;
+  originalId: number;
   submittedAt: string;
   admissionType: string;
   gender: string;
@@ -39,35 +38,27 @@ interface MigrationRecord {
   approvedAt?: string;
 }
 
-interface BatchResult {
-  id: number;
-  status: 'success' | 'failed';
-  routedTo?: string;
-  error?: string;
-}
-
-interface BatchResponse {
-  batchId: string;
-  total: number;
-  successful: number;
-  failed: number;
-  results: BatchResult[];
+interface BulkInsertResponse {
+  success: boolean;
+  inserted: number;
+  skipped: number;
+  skippedList: Array<{ originalId?: number; reason?: string }>;
 }
 
 export interface MigrationProgress {
   totalRecords: number;
   totalBatches: number;
   completedBatches: number;
-  successful: number;
-  failed: number;
-  failedRecords: BatchResult[];
+  inserted: number;
+  skipped: number;
+  skippedList: Array<{ originalId?: number; reason?: string }>;
   status: 'idle' | 'fetching' | 'migrating' | 'done' | 'error';
   errorMessage?: string;
 }
 
 function toMigrationRecord(record: FullStudentRecord): MigrationRecord {
   return {
-    id: record.id,
+    originalId: record.id,
     submittedAt: record.submittedAt,
     admissionType: record.admissionType,
     gender: record.gender,
@@ -94,29 +85,30 @@ function toMigrationRecord(record: FullStudentRecord): MigrationRecord {
     totalMarks: record.totalMarks || '',
     remarks: record.remarks || '',
     approvalStatus: record.approvalStatus || null,
-    // approvedBy and approvedAt would come from the full record if available
   };
 }
 
-/**
- * Send a batch to the migration API.
- * Currently mocked — replace with real axios call when the API URL is ready.
- */
-async function sendBatch(batchId: string, records: MigrationRecord[]): Promise<BatchResponse> {
-  // TODO: Replace with real API call:
-  const res = await axios.post(`${MIGRATION_API_URL}/api/migrate/batch`, { batchId, records });
-  return res.data;
+async function sendBatch(records: MigrationRecord[]): Promise<BulkInsertResponse> {
+  console.log(`[Migration] Sending batch of ${records.length} records to API...`);
+  console.log('[Migration] Request payload:', JSON.stringify(records, null, 2));
 
-  // Mock: simulate network delay, return all as success
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  const results: BatchResult[] = records.map((r) => ({
-    id: r.id,
-    status: 'success' as const,
-    routedTo: r.approvalStatus || 'pending',
-  }));
-
-  return { batchId, total: records.length, successful: records.length, failed: 0, results };
+  try {
+    const res = await axios.post<BulkInsertResponse>(
+      `${MIGRATION_API_URL}/Home/BulkInsertStudents`,
+      records
+    );
+    console.log('res --> ' ,res)
+    console.log('[Migration] Response status:', res.status);
+    console.log('[Migration] Response data:', res.data);
+    return res.data;
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      console.error('[Migration] API error status:', err.response?.status);
+      console.error('[Migration] API error data:', err.response?.data);
+      console.error('[Migration] API error headers:', err.response?.headers);
+    }
+    throw err;
+  }
 }
 
 export async function migrateAllRecords(
@@ -126,38 +118,45 @@ export async function migrateAllRecords(
     totalRecords: 0,
     totalBatches: 0,
     completedBatches: 0,
-    successful: 0,
-    failed: 0,
-    failedRecords: [],
+    inserted: 0,
+    skipped: 0,
+    skippedList: [],
     status: 'fetching',
   };
 
   onProgress({ ...progress });
 
   try {
-    // Step 1: Fetch all record IDs
+    // Step 1: Fetch all records
     const listResponse = await adminApi.getRecords({ pageSize: 10000 });
-    const recordIds: number[] = listResponse.data.map((r: { id: number }) => r.id);
-    progress.totalRecords = recordIds.length;
+    progress.totalRecords = listResponse.data.length;
 
-    if (recordIds.length === 0) {
+    if (listResponse.data.length === 0) {
       progress.status = 'done';
       onProgress({ ...progress });
       return progress;
     }
 
-    // Step 2: Fetch full details (parallel in chunks of 10 to avoid overload)
+    // Step 2: Fetch full details one at a time with delay to avoid 429
     const fullRecords: FullStudentRecord[] = [];
-    const FETCH_CHUNK = 10;
-    for (let i = 0; i < recordIds.length; i += FETCH_CHUNK) {
-      const chunk = recordIds.slice(i, i + FETCH_CHUNK);
-      const results = await Promise.all(chunk.map((id) => adminApi.getRecordById(id)));
-      fullRecords.push(...results);
+    const recordIds = listResponse.data.map((r) => r.id);
+    const DELAY_MS = 200;
+
+    for (let i = 0; i < recordIds.length; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, DELAY_MS));
+      try {
+        console.log(`[Migration] Fetching record ${i + 1}/${recordIds.length} (ID: ${recordIds[i]})`);
+        const record = await adminApi.getRecordById(recordIds[i]);
+        fullRecords.push(record);
+      } catch (err) {
+        console.warn(`[Migration] Failed to fetch record ID ${recordIds[i]}, skipping`, err);
+      }
     }
+    console.log(`[Migration] Total full records ready: ${fullRecords.length}`);
 
     // Step 3: Split into batches and send
-    const batches: MigrationRecord[][] = [];
     const migrationRecords = fullRecords.map(toMigrationRecord);
+    const batches: MigrationRecord[][] = [];
 
     for (let i = 0; i < migrationRecords.length; i += BATCH_SIZE) {
       batches.push(migrationRecords.slice(i, i + BATCH_SIZE));
@@ -168,13 +167,14 @@ export async function migrateAllRecords(
     onProgress({ ...progress });
 
     for (let i = 0; i < batches.length; i++) {
-      const batchId = `batch_${String(i + 1).padStart(3, '0')}`;
-      const response = await sendBatch(batchId, batches[i]);
+      const response = await sendBatch(batches[i]);
 
       progress.completedBatches = i + 1;
-      progress.successful += response.successful;
-      progress.failed += response.failed;
-      progress.failedRecords.push(...response.results.filter((r: BatchResult) => r.status === 'failed'));
+      progress.inserted += response.inserted;
+      progress.skipped += response.skipped;
+      if (response.skippedList?.length) {
+        progress.skippedList.push(...response.skippedList);
+      }
 
       onProgress({ ...progress });
     }

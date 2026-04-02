@@ -22,8 +22,8 @@ const MigrateButton: React.FC = () => {
 
     if (result.status === 'done') {
       showToast(
-        `منتقلی مکمل: ${result.successful} کامیاب، ${result.failed} ناکام`,
-        result.failed > 0 ? 'warning' : 'success'
+        `منتقلی مکمل: ${result.inserted} داخل، ${result.skipped} چھوڑے گئے`,
+        result.skipped > 0 ? 'warning' : 'success'
       );
     } else if (result.status === 'error') {
       showToast(result.errorMessage || 'منتقلی ناکام ہو گئی', 'error');
@@ -59,7 +59,6 @@ const MigrateButton: React.FC = () => {
 
       {showResults && progress && (
         <div className="migrate-progress-card">
-          {/* Status label */}
           <p className="migrate-status-text">
             {progress.status === 'fetching' && 'ریکارڈز لوڈ ہو رہے ہیں...'}
             {progress.status === 'migrating' && `بیچ ${progress.completedBatches}/${progress.totalBatches} بھیجا جا رہا ہے`}
@@ -67,35 +66,34 @@ const MigrateButton: React.FC = () => {
             {progress.status === 'error' && (progress.errorMessage || 'خرابی')}
           </p>
 
-          {/* Progress bar */}
           {progress.status === 'migrating' && (
             <div className="migrate-progress-bar-bg">
               <div className="migrate-progress-bar-fill" style={{ width: `${percentage}%` }} />
             </div>
           )}
 
-          {/* Stats */}
           {(progress.status === 'migrating' || progress.status === 'done') && (
             <div className="migrate-stats">
               <span>کل: {progress.totalRecords}</span>
-              <span className="migrate-stat-success">کامیاب: {progress.successful}</span>
-              <span className="migrate-stat-fail">ناکام: {progress.failed}</span>
+              <span className="migrate-stat-success">داخل: {progress.inserted}</span>
+              <span className="migrate-stat-fail">چھوڑے گئے: {progress.skipped}</span>
             </div>
           )}
 
-          {/* Failed records detail */}
-          {progress.status === 'done' && progress.failedRecords.length > 0 && (
+          {progress.status === 'done' && progress.skippedList.length > 0 && (
             <div className="migrate-failures">
-              <p className="migrate-failures-title">ناکام ریکارڈز:</p>
+              <p className="migrate-failures-title">چھوڑے گئے ریکارڈز:</p>
               <ul>
-                {progress.failedRecords.map((r) => (
-                  <li key={r.id}>ID {r.id}: {r.error}</li>
+                {progress.skippedList.map((r, i) => (
+                  <li key={r.originalId ?? i}>
+                    {r.originalId ? `ID ${r.originalId}` : `#${i + 1}`}
+                    {r.reason ? `: ${r.reason}` : ''}
+                  </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {/* Close button when done */}
           {(progress.status === 'done' || progress.status === 'error') && (
             <button className="migrate-close-btn" onClick={() => setShowResults(false)}>
               بند کریں

@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useRecords } from '../hooks/useRecords';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { adminApi } from '../services/adminApi';
 import { StudentRecord, FullStudentRecord } from '../types';
 import SearchBar from '../components/SearchBar';
 import FilterPanel from '../components/FilterPanel';
 import ExportButton from '../components/ExportButton';
+import MigrateButton from '../components/MigrateButton';
 import RecordsTable from '../components/RecordsTable';
 import Pagination from '../components/Pagination';
 import RecordDetailModal from '../components/RecordDetailModal';
@@ -16,6 +18,7 @@ import '../styles/ResultsPage.css';
 
 const ResultsPage: React.FC = () => {
   const { showToast } = useToast();
+  const { user } = useAuth();
   const {
     records,
     isLoading,
@@ -159,7 +162,10 @@ const ResultsPage: React.FC = () => {
         <div className="results-controls">
           <div className="controls-row">
             <SearchBar onSearch={handleSearch} />
-            <ExportButton filters={filters} />
+            <div className="controls-buttons">
+              <ExportButton filters={filters} />
+              {user?.isSuperAdmin && <MigrateButton />}
+            </div>
           </div>
           <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
         </div>

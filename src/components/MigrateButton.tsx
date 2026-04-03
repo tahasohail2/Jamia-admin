@@ -1,32 +1,84 @@
 import React, { useState } from 'react';
-import { migrateAllRecords, MigrationProgress } from '../services/migrationApi';
+import { migrateAllRecords, MigrationProgress, cancelMigration } from '../services/migrationApi';
 import { useToast } from '../context/ToastContext';
+import MigrationModal from './MigrationModal';
+import CancelConfirmDialog from './CancelConfirmDialog';
 
 const MigrateButton: React.FC = () => {
   const { showToast } = useToast();
   const [progress, setProgress] = useState<MigrationProgress | null>(null);
-  const [showResults, setShowResults] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const isRunning = progress?.status === 'fetching' || progress?.status === 'migrating';
 
-  const handleMigrate = async () => {
-    if (isRunning) return;
+  const handleOpenModal = () => {
+    // Reset progress state when opening modal for a fresh start
+    if (progress?.status === 'error' || progress?.status === 'done') {
+      setProgress(null);
+    }
+    setIsModalOpen(true);
+    setIsMinimized(false);
+  };
 
-    const confirmed = window.confirm(
-      'کیا آپ تمام ریکارڈز کو نئے ڈیٹابیس میں منتقل کرنا چاہتے ہیں؟'
-    );
-    if (!confirmed) return;
+  const handleCloseModal = () => {
+    if (isRunning) {
+      // Show cancel confirmation modal
+      setShowCancelConfirm(true);
+    } else {
+      setIsModalOpen(false);
+      setIsMinimized(false);
+      setProgress(null);
+    }
+  };
 
-    setShowResults(true);
+  const handleConfirmCancel = () => {
+    cancelMigration();
+    showToast('منتقلی منسوخ کر دی گئی', 'warning');
+    setShowCancelConfirm(false);
+    setIsModalOpen(false);
+    setIsMinimized(false);
+    setProgress(null);
+  };
+
+  const handleCancelCancel = () => {
+    setShowCancelConfirm(false);
+  };
+
+  const handleMinimize = () => {
+    setIsModalOpen(false);
+    setIsMinimized(true);
+  };
+
+  const handleMaximize = () => {
+    setIsModalOpen(true);
+    setIsMinimized(false);
+  };
+
+  const handleCancelModal = () => {
+    if (!isRunning) {
+      setIsModalOpen(false);
+      setIsMinimized(false);
+      setProgress(null);
+    }
+  };
+
+  const handleConfirmMigration = async () => {
     const result = await migrateAllRecords(setProgress);
 
     if (result.status === 'done') {
+      const inserted = result.inserted || 0;
+      const skipped = result.skipped || 0;
       showToast(
-        `منتقلی مکمل: ${result.inserted} داخل، ${result.skipped} چھوڑے گئے`,
-        result.skipped > 0 ? 'warning' : 'success'
+        `منتقلی مکمل: ${inserted} داخل، ${skipped} چھوڑے گئے`,
+        skipped > 0 ? 'warning' : 'success'
       );
     } else if (result.status === 'error') {
-      showToast(result.errorMessage || 'منتقلی ناکام ہو گئی', 'error');
+      // Don't show toast if it was cancelled (already shown in handleConfirmCancel)
+      if (result.errorMessage !== 'منتقلی منسوخ کر دی گئی') {
+        showToast(result.errorMessage || 'منتقلی ناکام ہو گئی', 'error');
+      }
     }
   };
 
@@ -36,69 +88,55 @@ const MigrateButton: React.FC = () => {
       : 0;
 
   return (
-    <div className="migrate-section">
+    <>
       <button
         className="migrate-btn"
-        onClick={handleMigrate}
+        onClick={handleOpenModal}
         disabled={isRunning}
       >
-        {isRunning ? (
-          <>
-            <span className="migrate-spinner" />
-            منتقلی جاری ہے...
-          </>
-        ) : (
-          <>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-              <path d="M12 5v14M5 12l7-7 7 7" />
-            </svg>
-            ڈیٹا منتقل کریں
-          </>
-        )}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+          <path d="M12 5v14M5 12l7-7 7 7" />
+        </svg>
+        ڈیٹا منتقل کریں
       </button>
 
-      {showResults && progress && (
-        <div className="migrate-progress-card">
-          <p className="migrate-status-text">
-            {progress.status === 'fetching' && 'ریکارڈز لوڈ ہو رہے ہیں...'}
-            {progress.status === 'migrating' && `بیچ ${progress.completedBatches}/${progress.totalBatches} بھیجا جا رہا ہے`}
-            {progress.status === 'done' && 'منتقلی مکمل ہو گئی'}
-            {progress.status === 'error' && (progress.errorMessage || 'خرابی')}
-          </p>
+      <MigrationModal
+        isOpen={isModalOpen}
+        progress={progress}
+        onConfirm={handleConfirmMigration}
+        onCancel={handleCancelModal}
+        onClose={handleCloseModal}
+        onMinimize={handleMinimize}
+      />
 
-          {progress.status === 'migrating' && (
-            <div className="migrate-progress-bar-bg">
-              <div className="migrate-progress-bar-fill" style={{ width: `${percentage}%` }} />
+      <CancelConfirmDialog
+        isOpen={showCancelConfirm}
+        onConfirm={handleConfirmCancel}
+        onCancel={handleCancelCancel}
+      />
+
+      {isMinimized && progress && (
+        <div className="migration-minimized-indicator" onClick={handleMaximize}>
+          <div className="migration-minimized-content">
+            <div className="migration-minimized-icon">
+              {isRunning ? (
+                <span className="migration-minimized-spinner"></span>
+              ) : (
+                <span className="migration-minimized-check">✓</span>
+              )}
             </div>
-          )}
-
-          {(progress.status === 'migrating' || progress.status === 'done') && (
-            <div className="migrate-stats">
-              <span>کل: {progress.totalRecords}</span>
-              <span className="migrate-stat-success">داخل: {progress.inserted}</span>
-              <span className="migrate-stat-fail">چھوڑے گئے: {progress.skipped}</span>
+            <div className="migration-minimized-text">
+              <span className="migration-minimized-title">ڈیٹا منتقلی</span>
+              {isRunning ? (
+                <span className="migration-minimized-status">{percentage}% مکمل</span>
+              ) : (
+                <span className="migration-minimized-status">مکمل</span>
+              )}
             </div>
-          )}
-
-          {progress.status === 'done' && progress.skippedList.length > 0 && (
-            <div className="migrate-failures">
-              <p className="migrate-failures-title">چھوڑے گئے ریکارڈز (CNIC):</p>
-              <ul>
-                {progress.skippedList.map((cnic, i) => (
-                  <li key={i}>{cnic}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {(progress.status === 'done' || progress.status === 'error') && (
-            <button className="migrate-close-btn" onClick={() => setShowResults(false)}>
-              بند کریں
-            </button>
-          )}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

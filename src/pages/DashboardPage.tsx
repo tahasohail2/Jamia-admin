@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import MigrateButton from '../components/MigrateButton';
 import { adminApi } from '../services/adminApi';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
 
 interface DashboardStats {
@@ -13,6 +14,7 @@ interface DashboardStats {
 }
 
 const DashboardPage: React.FC = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalEntries: 0,
     approvedEntries: 0,
@@ -95,7 +97,7 @@ const DashboardPage: React.FC = () => {
           <p className="dashboard-subtitle">تجزیاتی جائزہ</p>
         </div>
 
-        <MigrateButton />
+        {user?.isSuperAdmin && <MigrateButton />}
 
         {isLoading ? (
           <div className="dashboard-loading">

@@ -93,6 +93,22 @@ class AdminApi {
     }
   }
 
+  async updateRecord(id: number, data: Partial<FullStudentRecord>): Promise<FullStudentRecord> {
+    try {
+      const response = await axiosInstance.put<FullStudentRecord>(
+        `/api/admin/records/${id}`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to update record');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+
   async updateApprovalStatus(id: number, status: 'approved' | 'disapproved' | 'pending' | null): Promise<void> {
     try {
       // Convert null to 'pending' for backend compatibility

@@ -719,6 +719,103 @@ tr:hover {
   color: #c82333;
 }
 
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Edit button */
+.btn-edit-small {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-edit-small .edit-icon {
+  font-size: 18px;
+}
+
+.btn-edit-small .edit-text {
+  font-size: 13px;
+  color: #058464;
+  font-weight: 600;
+}
+
+.btn-edit-small:hover {
+  transform: scale(1.1);
+}
+
+.btn-edit-small:hover .edit-text {
+  color: #046b52;
+}
+
+/* Edit Modal Form Styles */
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.edit-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.edit-field input,
+.edit-field select,
+.edit-field textarea {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.edit-field input:focus,
+.edit-field select:focus,
+.edit-field textarea:focus {
+  outline: none;
+  border-color: #058464;
+  box-shadow: 0 0 0 3px rgba(5, 132, 100, 0.1);
+}
+
+.edit-field textarea {
+  resize: vertical;
+}
+
+.field-error {
+  font-size: 12px;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .edit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Approval dropdown styling */
 .approval-dropdown {
   padding: 4px 8px;

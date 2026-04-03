@@ -1,34 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../context/ToastContext';
-import { useAuth } from '../hooks/useAuth';
 import { adminApi } from '../services/adminApi';
-import { AdminUser } from '../types';
 import '../styles/ChangePasswordModal.css';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
+  userId: number | null;
+  username: string;
 }
 
-const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose }) => {
+const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, userId, username }) => {
   const { showToast } = useToast();
-  const { user } = useAuth();
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
-  const [users, setUsers] = useState<AdminUser[]>([]);
   const [isChanging, setIsChanging] = useState(false);
   const [error, setError] = useState('');
-
-  const isSuperAdmin = user?.isSuperAdmin || false;
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      if (isSuperAdmin) {
-        loadUsers();
-      }
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -36,97 +27,49 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, isSuperAdmin]);
-
-  const loadUsers = async () => {
-    try {
-      const allUsers = await adminApi.getAllUsers();
-      setUsers(allUsers);
-    } catch (error) {
-      console.error('Failed to load users:', error);
-    }
-  };
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (isSuperAdmin) {
-      // Super admin changing another user's password
-      if (!selectedUserId) {
-        setError('صارف منتخب کریں');
-        return;
-      }
+    if (!userId) {
+      setError('صارف منتخب نہیں ہوا');
+      return;
+    }
 
-      if (!newPassword || !confirmPassword) {
-        setError('تمام فیلڈز ضروری ہیں');
-        return;
-      }
+    if (!newPassword || !confirmPassword) {
+      setError('تمام فیلڈز ضروری ہیں');
+      return;
+    }
 
-      if (newPassword.length < 6) {
-        setError('نیا پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے');
-        return;
-      }
+    if (newPassword.length < 6) {
+      setError('نیا پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے');
+      return;
+    }
 
-      if (newPassword !== confirmPassword) {
-        setError('نیا پاس ورڈ اور تصدیقی پاس ورڈ مماثل نہیں ہیں');
-        return;
-      }
+    if (newPassword !== confirmPassword) {
+      setError('نیا پاس ورڈ اور تصدیقی پاس ورڈ مماثل نہیں ہیں');
+      return;
+    }
 
-      try {
-        setIsChanging(true);
-        await adminApi.changeUserPassword(Number(selectedUserId), newPassword);
-        showToast('پاس ورڈ کامیابی سے تبدیل ہو گیا', 'success');
-        handleClose();
-      } catch (error: any) {
-        console.error('Password change failed:', error);
-        setError(error.message || 'پاس ورڈ تبدیل نہیں ہو سکا');
-        showToast('پاس ورڈ تبدیل نہیں ہو سکا', 'error');
-      } finally {
-        setIsChanging(false);
-      }
-    } else {
-      // Regular admin changing own password
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        setError('تمام فیلڈز ضروری ہیں');
-        return;
-      }
-
-      if (newPassword.length < 6) {
-        setError('نیا پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے');
-        return;
-      }
-
-      if (newPassword !== confirmPassword) {
-        setError('نیا پاس ورڈ اور تصدیقی پاس ورڈ مماثل نہیں ہیں');
-        return;
-      }
-
-      if (currentPassword === newPassword) {
-        setError('نیا پاس ورڈ موجودہ پاس ورڈ سے مختلف ہونا چاہیے');
-        return;
-      }
-
-      try {
-        setIsChanging(true);
-        await adminApi.changePassword(currentPassword, newPassword);
-        showToast('پاس ورڈ کامیابی سے تبدیل ہو گیا', 'success');
-        handleClose();
-      } catch (error: any) {
-        console.error('Password change failed:', error);
-        setError(error.message || 'پاس ورڈ تبدیل نہیں ہو سکا');
-        showToast('پاس ورڈ تبدیل نہیں ہو سکا', 'error');
-      } finally {
-        setIsChanging(false);
-      }
+    try {
+      setIsChanging(true);
+      await adminApi.changeUserPassword(userId, newPassword);
+      showToast('پاس ورڈ کامیابی سے تبدیل ہو گیا', 'success');
+      handleClose();
+    } catch (error: any) {
+      console.error('Password change failed:', error);
+      setError(error.message || 'پاس ورڈ تبدیل نہیں ہو سکا');
+      showToast('پاس ورڈ تبدیل نہیں ہو سکا', 'error');
+    } finally {
+      setIsChanging(false);
     }
   };
 
   const handleClose = () => {
-    setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    setSelectedUserId('');
     setError('');
     onClose();
   };
@@ -137,7 +80,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content modal-password" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{isSuperAdmin ? 'صارف کا پاس ورڈ تبدیل کریں' : 'پاس ورڈ تبدیل کریں'}</h2>
+          <h2>{username} کا پاس ورڈ تبدیل کریں</h2>
           <button
             className="modal-close"
             onClick={handleClose}
@@ -156,90 +99,30 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               </div>
             )}
 
-            {isSuperAdmin ? (
-              <>
-                <div className="form-group">
-                  <label className="form-label">صارف منتخب کریں</label>
-                  <select
-                    className="form-input"
-                    value={selectedUserId}
-                    onChange={(e) => setSelectedUserId(e.target.value ? Number(e.target.value) : '')}
-                    disabled={isChanging}
-                  >
-                    <option value="">صارف منتخب کریں</option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.username} {u.isSuperAdmin ? '(سپر ایڈمن)' : '(ایڈمن)'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="form-group">
+              <label className="form-label">نیا پاس ورڈ</label>
+              <input
+                type="password"
+                className="form-input"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={isChanging}
+                autoComplete="new-password"
+              />
+              <small className="form-hint">کم از کم 6 حروف</small>
+            </div>
 
-                <div className="form-group">
-                  <label className="form-label">نیا پاس ورڈ</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isChanging}
-                    autoComplete="new-password"
-                  />
-                  <small className="form-hint">کم از کم 6 حروف</small>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">نیا پاس ورڈ دوبارہ درج کریں</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isChanging}
-                    autoComplete="new-password"
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="form-group">
-                  <label className="form-label">موجودہ پاس ورڈ</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    disabled={isChanging}
-                    autoComplete="current-password"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">نیا پاس ورڈ</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isChanging}
-                    autoComplete="new-password"
-                  />
-                  <small className="form-hint">کم از کم 6 حروف</small>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">نیا پاس ورڈ دوبارہ درج کریں</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isChanging}
-                    autoComplete="new-password"
-                  />
-                </div>
-              </>
-            )}
+            <div className="form-group">
+              <label className="form-label">نیا پاس ورڈ دوبارہ درج کریں</label>
+              <input
+                type="password"
+                className="form-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isChanging}
+                autoComplete="new-password"
+              />
+            </div>
           </div>
 
           <div className="modal-footer">

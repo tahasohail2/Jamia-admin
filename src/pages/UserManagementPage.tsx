@@ -6,6 +6,7 @@ import { AdminUser } from '../types';
 // User management components
 import CreateUserModal from '../components/CreateUserModal';
 import DeleteUserDialog from '../components/DeleteUserDialog';
+import ChangePasswordModal from '../components/ChangePasswordModal';
 import '../styles/UserManagementPage.css';
 
 const UserManagementPage: React.FC = () => {
@@ -15,6 +16,8 @@ const UserManagementPage: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [userToChangePassword, setUserToChangePassword] = useState<AdminUser | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -45,6 +48,11 @@ const UserManagementPage: React.FC = () => {
       console.error('Failed to toggle user status:', error);
       showToast(error.message || 'صارف کی حیثیت تبدیل نہیں ہو سکی', 'error');
     }
+  };
+
+  const handleChangePasswordClick = (user: AdminUser) => {
+    setUserToChangePassword(user);
+    setIsPasswordModalOpen(true);
   };
 
   const handleDeleteClick = (user: AdminUser) => {
@@ -137,6 +145,17 @@ const UserManagementPage: React.FC = () => {
                     <td>
                       <div className="action-buttons">
                         <button
+                          className="btn-action btn-edit"
+                          onClick={() => handleChangePasswordClick(user)}
+                          title="پاس ورڈ تبدیل کریں"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                          <span className="btn-action-label">پاس ورڈ</span>
+                        </button>
+                        <button
                           className={`btn-action ${user.isActive ? 'btn-deactivate' : 'btn-activate'}`}
                           onClick={() => handleToggleStatus(user)}
                           title={user.isActive ? 'غیر فعال کریں' : 'فعال کریں'}
@@ -198,6 +217,16 @@ const UserManagementPage: React.FC = () => {
           setIsDeleteDialogOpen(false);
           setUserToDelete(null);
         }}
+      />
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => {
+          setIsPasswordModalOpen(false);
+          setUserToChangePassword(null);
+        }}
+        userId={userToChangePassword?.id ?? null}
+        username={userToChangePassword?.username || ''}
       />
     </DashboardLayout>
   );

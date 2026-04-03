@@ -11,6 +11,7 @@ import RecordsTable from '../components/RecordsTable';
 import Pagination from '../components/Pagination';
 import RecordDetailModal from '../components/RecordDetailModal';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
+import EditRecordModal from '../components/EditRecordModal';
 import '../styles/ResultsPage.css';
 
 const ResultsPage: React.FC = () => {
@@ -35,6 +36,9 @@ const ResultsPage: React.FC = () => {
   const [recordToDelete, setRecordToDelete] = useState<StudentRecord | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [recordToEdit, setRecordToEdit] = useState<FullStudentRecord | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Handle record click to view details
   const handleRecordClick = async (record: StudentRecord) => {
@@ -80,6 +84,41 @@ const ResultsPage: React.FC = () => {
   const handleDeleteCancel = () => {
     setIsDeleteDialogOpen(false);
     setRecordToDelete(null);
+  };
+
+  // Handle edit button click
+  const handleEditClick = async (record: StudentRecord) => {
+    try {
+      const fullRecord = await adminApi.getRecordById(record.id);
+      setRecordToEdit(fullRecord);
+      setIsEditModalOpen(true);
+    } catch (error) {
+      console.error('Failed to fetch record for editing:', error);
+      showToast('ریکارڈ لوڈ نہیں ہو سکا', 'error');
+    }
+  };
+
+  // Handle edit save
+  const handleEditSave = async (id: number, data: Partial<FullStudentRecord>) => {
+    try {
+      setIsSaving(true);
+      await adminApi.updateRecord(id, data);
+      showToast('ریکارڈ کامیابی سے اپ ڈیٹ ہو گیا', 'success');
+      setIsEditModalOpen(false);
+      setRecordToEdit(null);
+      refresh();
+    } catch (error) {
+      console.error('Failed to update record:', error);
+      showToast('ریکارڈ اپ ڈیٹ نہیں ہو سکا', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle edit modal close
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setRecordToEdit(null);
   };
 
   // Handle approval status change (supports approved, disapproved, or null to reset)
@@ -141,6 +180,7 @@ const ResultsPage: React.FC = () => {
             records={records}
             isLoading={isLoading}
             onRecordClick={handleRecordClick}
+            onEditClick={handleEditClick}
             onDeleteClick={handleDeleteClick}
             onApprovalChange={handleApprovalChange}
           />
@@ -171,6 +211,14 @@ const ResultsPage: React.FC = () => {
         isDeleting={isDeleting}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
+      />
+
+      <EditRecordModal
+        isOpen={isEditModalOpen}
+        record={recordToEdit}
+        isSaving={isSaving}
+        onSave={handleEditSave}
+        onClose={handleEditModalClose}
       />
     </DashboardLayout>
   );

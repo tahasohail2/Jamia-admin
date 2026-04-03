@@ -5,6 +5,7 @@ interface RecordsTableProps {
   records: StudentRecord[];
   isLoading: boolean;
   onRecordClick: (record: StudentRecord) => void;
+  onEditClick: (record: StudentRecord) => void;
   onDeleteClick: (record: StudentRecord) => void;
   onApprovalChange: (recordId: number, status: 'approved' | 'disapproved' | 'pending' | null) => void;
 }
@@ -13,6 +14,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
   records,
   isLoading,
   onRecordClick,
+  onEditClick,
   onDeleteClick,
   onApprovalChange,
 }) => {
@@ -128,17 +130,30 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               </td>
               <td>{formatDateTime(record.submittedAt)}</td>
               <td>
-                <button
-                  className="btn-delete-small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteClick(record);
-                  }}
-                  aria-label={`Delete record for ${record.studentName}`}
-                >
-                  <span className="delete-icon">🗑️</span>
-                  <span className="delete-text">حذف</span>
-                </button>
+                <div className="action-buttons">
+                  <button
+                    className="btn-edit-small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditClick(record);
+                    }}
+                    aria-label={`Edit record for ${record.studentName}`}
+                  >
+                    <span className="edit-icon">✏️</span>
+                    <span className="edit-text">ترمیم</span>
+                  </button>
+                  <button
+                    className="btn-delete-small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteClick(record);
+                    }}
+                    aria-label={`Delete record for ${record.studentName}`}
+                  >
+                    <span className="delete-icon">🗑️</span>
+                    <span className="delete-text">حذف</span>
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

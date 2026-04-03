@@ -81,11 +81,25 @@ const MigrationModal: React.FC<MigrationModalProps> = ({
           ) : (
             <div className="migration-progress-content">
               <p className="migration-status-text">
-                {progress?.status === 'fetching' && 'ریکارڈز لوڈ ہو رہے ہیں...'}
+                {progress?.status === 'fetching' && `ریکارڈز لوڈ ہو رہے ہیں... (${progress.fetchedRecords || 0}/${progress.totalRecords})`}
                 {progress?.status === 'migrating' && `بیچ ${progress.completedBatches}/${progress.totalBatches} بھیجا جا رہا ہے`}
                 {progress?.status === 'done' && 'منتقلی مکمل ہو گئی'}
                 {progress?.status === 'error' && (progress.errorMessage || 'خرابی')}
               </p>
+
+              {progress?.status === 'fetching' && progress.totalRecords > 0 && (
+                <div className="migration-progress-bar-container">
+                  <div className="migration-progress-bar-bg">
+                    <div 
+                      className="migration-progress-bar-fill" 
+                      style={{ width: `${Math.round(((progress.fetchedRecords || 0) / progress.totalRecords) * 100)}%` }} 
+                    />
+                  </div>
+                  <span className="migration-progress-percentage">
+                    {Math.round(((progress.fetchedRecords || 0) / progress.totalRecords) * 100)}%
+                  </span>
+                </div>
+              )}
 
               {progress?.status === 'migrating' && (
                 <div className="migration-progress-bar-container">

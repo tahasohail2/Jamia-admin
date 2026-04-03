@@ -1420,3 +1420,240 @@ tr:hover {
   color: #999;
   font-size: 14px;
 }
+/* Migration Modal Styling */
+.migration-progress-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.migration-status-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-color);
+  text-align: center;
+  margin: 0;
+}
+
+.migration-progress-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.migration-progress-bar-bg {
+  width: 100%;
+  height: 24px;
+  background-color: #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.migration-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color) 0%, #06a577 100%);
+  border-radius: 12px;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.migration-progress-percentage {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.migration-stats {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--bg-light);
+  border-radius: 8px;
+}
+
+.migration-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.migration-stat-label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.migration-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.migration-stat-success .migration-stat-value {
+  color: #28a745;
+}
+
+.migration-stat-fail .migration-stat-value {
+  color: #dc3545;
+}
+
+.migration-failures {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.migration-failures-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #856404;
+  margin: 0 0 12px 0;
+}
+
+.migration-failures-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.migration-failures-list li {
+  font-size: 13px;
+  color: #856404;
+  padding: 4px 8px;
+  background-color: rgba(255, 193, 7, 0.1);
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .migration-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .migration-stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+/* Modal Header Actions */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-minimize {
+  background: none;
+  border: none;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  font-weight: 300;
+}
+
+.modal-minimize:hover {
+  color: var(--text-color);
+}
+
+/* Minimized Migration Indicator */
+.migration-minimized-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 999;
+  min-width: 250px;
+  border: 2px solid var(--primary-color);
+}
+
+.migration-minimized-indicator:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.migration-minimized-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.migration-minimized-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.migration-minimized-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.migration-minimized-check {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.migration-minimized-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.migration-minimized-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.migration-minimized-status {
+  font-size: 12px;
+  color: #666;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .migration-minimized-indicator {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    min-width: auto;
+  }
+}

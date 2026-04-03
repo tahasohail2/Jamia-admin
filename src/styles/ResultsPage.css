@@ -38,6 +38,12 @@
   flex-wrap: wrap;
 }
 
+.controls-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .results-content {
   background: white;
   border-radius: 12px;

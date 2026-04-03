@@ -63,6 +63,7 @@ export interface MigrationProgress {
   skippedList: string[];
   status: 'idle' | 'fetching' | 'migrating' | 'done' | 'error';
   errorMessage?: string;
+  fetchedRecords?: number; // Track how many records have been fetched
 }
 
 function toMigrationRecord(record: FullStudentRecord): MigrationRecord {
@@ -188,6 +189,7 @@ export async function migrateAllRecords(
     skipped: 0,
     skippedList: [],
     status: 'fetching',
+    fetchedRecords: 0,
   };
 
   onProgress({ ...progress });
@@ -235,6 +237,10 @@ export async function migrateAllRecords(
         console.log(`[Migration] Fetching record ${i + 1}/${recordIds.length} (ID: ${recordIds[i]})`);
         const record = await adminApi.getRecordById(recordIds[i]);
         fullRecords.push(record);
+        
+        // Update progress with fetched count
+        progress.fetchedRecords = i + 1;
+        onProgress({ ...progress });
       } catch (err) {
         console.warn(`[Migration] Failed to fetch record ID ${recordIds[i]}, skipping`, err);
         

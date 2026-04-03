@@ -42,7 +42,8 @@ interface BulkInsertResponse {
   success: boolean;
   inserted: number;
   skipped: number;
-  skippedList: Array<{ originalId?: number; reason?: string }>;
+  updated?: number;
+  skippedList: string[];
 }
 
 export interface MigrationProgress {
@@ -51,7 +52,7 @@ export interface MigrationProgress {
   completedBatches: number;
   inserted: number;
   skipped: number;
-  skippedList: Array<{ originalId?: number; reason?: string }>;
+  skippedList: string[];
   status: 'idle' | 'fetching' | 'migrating' | 'done' | 'error';
   errorMessage?: string;
 }

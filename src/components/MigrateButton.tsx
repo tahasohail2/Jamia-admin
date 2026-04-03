@@ -82,13 +82,10 @@ const MigrateButton: React.FC = () => {
 
           {progress.status === 'done' && progress.skippedList.length > 0 && (
             <div className="migrate-failures">
-              <p className="migrate-failures-title">چھوڑے گئے ریکارڈز:</p>
+              <p className="migrate-failures-title">چھوڑے گئے ریکارڈز (CNIC):</p>
               <ul>
-                {progress.skippedList.map((r, i) => (
-                  <li key={r.originalId ?? i}>
-                    {r.originalId ? `ID ${r.originalId}` : `#${i + 1}`}
-                    {r.reason ? `: ${r.reason}` : ''}
-                  </li>
+                {progress.skippedList.map((cnic, i) => (
+                  <li key={i}>{cnic}</li>
                 ))}
               </ul>
             </div>

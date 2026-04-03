@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { useRecords } from '../hooks/useRecords';
 import { useToast } from '../context/ToastContext';
@@ -19,6 +20,9 @@ import '../styles/ResultsPage.css';
 const ResultsPage: React.FC = () => {
   const { showToast } = useToast();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const initialApprovalStatus = searchParams.get('approvalStatus') || undefined;
+
   const {
     records,
     isLoading,
@@ -32,7 +36,7 @@ const ResultsPage: React.FC = () => {
     handleFilterChange,
     handlePageChange,
     refresh,
-  } = useRecords();
+  } = useRecords(initialApprovalStatus ? { approvalStatus: initialApprovalStatus } : undefined);
 
   const [selectedRecord, setSelectedRecord] = useState<FullStudentRecord | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -42,6 +46,7 @@ const ResultsPage: React.FC = () => {
   const [recordToEdit, setRecordToEdit] = useState<FullStudentRecord | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [batchRefreshKey, setBatchRefreshKey] = useState(0);
 
   // Handle record click to view details
   const handleRecordClick = async (record: StudentRecord) => {
@@ -105,7 +110,17 @@ const ResultsPage: React.FC = () => {
   const handleEditSave = async (id: number, data: Partial<FullStudentRecord>) => {
     try {
       setIsSaving(true);
-      await adminApi.updateRecord(id, data);
+      
+      // Extract approval fields separately
+      const { approvalStatus, approvalComments, ...recordData } = data;
+      
+      // Update record fields
+      await adminApi.updateRecord(id, { ...recordData, approvalComments });
+      
+      // Update approval status if changed
+      const statusValue = approvalStatus || null;
+      await adminApi.updateApprovalStatus(id, statusValue as 'approved' | 'disapproved' | 'pending' | null);
+      
       showToast('ریکارڈ کامیابی سے اپ ڈیٹ ہو گیا', 'success');
       setIsEditModalOpen(false);
       setRecordToEdit(null);
@@ -122,24 +137,6 @@ const ResultsPage: React.FC = () => {
   const handleEditModalClose = () => {
     setIsEditModalOpen(false);
     setRecordToEdit(null);
-  };
-
-  // Handle approval status change (supports approved, disapproved, or null to reset)
-  const handleApprovalChange = async (recordId: number, status: 'approved' | 'disapproved' | 'pending' | null) => {
-    try {
-      await adminApi.updateApprovalStatus(recordId, status);
-      showToast(
-        status === 'approved' ? 'ریکارڈ منظور ہو گیا' : 
-        status === 'disapproved' ? 'ریکارڈ مسترد ہو گیا' : 
-        'اسٹیٹس ری سیٹ ہو گیا',
-        'success'
-      );
-      // Refresh the records list to show updated status
-      refresh();
-    } catch (error) {
-      console.error('Failed to update approval status:', error);
-      showToast('اسٹیٹس اپ ڈیٹ نہیں ہو سکا', 'error');
-    }
   };
 
   // Handle detail modal close
@@ -164,10 +161,10 @@ const ResultsPage: React.FC = () => {
             <SearchBar onSearch={handleSearch} />
             <div className="controls-buttons">
               <ExportButton filters={filters} />
-              {user?.isSuperAdmin && <MigrateButton />}
+              {user?.isSuperAdmin && <MigrateButton onMigrationComplete={() => { setBatchRefreshKey((k) => k + 1); refresh(); }} />}
             </div>
           </div>
-          <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
+          <FilterPanel filters={filters} onFilterChange={handleFilterChange} refreshKey={batchRefreshKey} />
         </div>
 
         {/* Error Display */}
@@ -188,7 +185,6 @@ const ResultsPage: React.FC = () => {
             onRecordClick={handleRecordClick}
             onEditClick={handleEditClick}
             onDeleteClick={handleDeleteClick}
-            onApprovalChange={handleApprovalChange}
           />
         </div>
 

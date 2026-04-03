@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   RecordFilters,
   AdminUser,
+  MigrationBatch,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -50,6 +51,7 @@ class AdminApi {
       if (filters.gender) params.append('gender', filters.gender);
       if (filters.department) params.append('department', filters.department);
       if (filters.approvalStatus) params.append('approvalStatus', filters.approvalStatus);
+      if (filters.migrationBatchId) params.append('migrationBatchId', filters.migrationBatchId);
       if (filters.page) params.append('page', filters.page.toString());
       if (filters.pageSize) params.append('pageSize', filters.pageSize.toString());
 
@@ -131,6 +133,7 @@ class AdminApi {
       if (filters.gender) params.append('gender', filters.gender);
       if (filters.department) params.append('department', filters.department);
       if (filters.approvalStatus) params.append('approvalStatus', filters.approvalStatus);
+      if (filters.migrationBatchId) params.append('migrationBatchId', filters.migrationBatchId);
 
       const response = await axiosInstance.get(
         `/api/admin/records/export?${params.toString()}`,
@@ -223,6 +226,36 @@ class AdminApi {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Failed to delete user');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  // Migration Batch APIs
+  async markRecordsMigrated(recordIds: number[], batchId: string): Promise<void> {
+    try {
+      await axiosInstance.post('/api/admin/records/mark-migrated', {
+        recordIds,
+        batchId,
+        migratedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to mark records as migrated');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async getMigrationBatches(): Promise<MigrationBatch[]> {
+    try {
+      const response = await axiosInstance.get<{ batches: MigrationBatch[] }>(
+        '/api/admin/migration-batches'
+      );
+      return response.data.batches;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch migration batches');
       }
       throw new Error('An unexpected error occurred');
     }

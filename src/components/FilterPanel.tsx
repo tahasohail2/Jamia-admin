@@ -1,12 +1,22 @@
-import React from 'react';
-import { RecordFilters } from '../types';
+import React, { useEffect, useState } from 'react';
+import { RecordFilters, MigrationBatch } from '../types';
+import { adminApi } from '../services/adminApi';
 
 interface FilterPanelProps {
   filters: RecordFilters;
   onFilterChange: (filters: RecordFilters) => void;
+  refreshKey?: number;
 }
 
-const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) => {
+const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, refreshKey }) => {
+  const [batches, setBatches] = useState<MigrationBatch[]>([]);
+
+  useEffect(() => {
+    adminApi.getMigrationBatches()
+      .then(setBatches)
+      .catch(() => setBatches([]));
+  }, [refreshKey]);
+
   const handleChange = (field: keyof RecordFilters, value: string) => {
     onFilterChange({
       ...filters,
@@ -21,6 +31,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
       gender: undefined,
       department: undefined,
       approvalStatus: undefined,
+      migrationBatchId: undefined,
     });
   };
 
@@ -29,6 +40,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
     filters.gender,
     filters.department,
     filters.approvalStatus,
+    filters.migrationBatchId,
   ].filter(Boolean).length;
 
   return (
@@ -104,6 +116,26 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
             <option value="approved">منظور شدہ</option>
             <option value="disapproved">مسترد</option>
             <option value="pending">زیر التواء</option>
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="migrationBatchId" className="filter-label">
+            منتقلی بیچ
+          </label>
+          <select
+            id="migrationBatchId"
+            className="filter-select"
+            value={filters.migrationBatchId || ''}
+            onChange={(e) => handleChange('migrationBatchId', e.target.value)}
+          >
+            <option value="">سب</option>
+            <option value="not_migrated">غیر منتقل شدہ</option>
+            {batches.map((batch) => (
+              <option key={batch.batchId} value={batch.batchId}>
+                {batch.batchId} ({batch.totalRecords})
+              </option>
+            ))}
           </select>
         </div>
 

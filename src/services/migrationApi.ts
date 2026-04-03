@@ -63,7 +63,8 @@ export interface MigrationProgress {
   skippedList: string[];
   status: 'idle' | 'fetching' | 'migrating' | 'done' | 'error';
   errorMessage?: string;
-  fetchedRecords?: number; // Track how many records have been fetched
+  fetchedRecords?: number;
+  batchId?: string;
 }
 
 function toMigrationRecord(record: FullStudentRecord): MigrationRecord {
@@ -97,7 +98,7 @@ function toMigrationRecord(record: FullStudentRecord): MigrationRecord {
     approvalStatus: record.approvalStatus || null,
   };
 }
-debugger;
+
 async function sendBatch(records: MigrationRecord[], retryCount = 0): Promise<BulkInsertResponse> {
   const MAX_RETRIES = 2;
   
@@ -175,11 +176,22 @@ async function sendBatch(records: MigrationRecord[], retryCount = 0): Promise<Bu
   }
 }
 
+function generateBatchId(): string {
+  const now = new Date();
+  const mm = (now.getMonth() + 1).toString().padStart(2, '0');
+  const dd = now.getDate().toString().padStart(2, '0');
+  const hh = now.getHours().toString().padStart(2, '0');
+  const min = now.getMinutes().toString().padStart(2, '0');
+  return `B-${mm}${dd}-${hh}${min}`;
+}
+
 export async function migrateAllRecords(
   onProgress: (progress: MigrationProgress) => void
 ): Promise<MigrationProgress> {
   // Reset cancellation flag
   isCancelled = false;
+
+  const batchId = generateBatchId();
   
   const progress: MigrationProgress = {
     totalRecords: 0,
@@ -190,13 +202,14 @@ export async function migrateAllRecords(
     skippedList: [],
     status: 'fetching',
     fetchedRecords: 0,
+    batchId,
   };
 
   onProgress({ ...progress });
 
   try {
-    // Step 1: Fetch all records
-    const listResponse = await adminApi.getRecords({ pageSize: 10000 });
+    // Step 1: Fetch only approved records that haven't been migrated yet
+    const listResponse = await adminApi.getRecords({ pageSize: 10000, approvalStatus: 'approved', migrationBatchId: 'not_migrated' });
     progress.totalRecords = listResponse.data.length;
 
     if (listResponse.data.length === 0) {
@@ -269,6 +282,14 @@ export async function migrateAllRecords(
       batches.push(migrationRecords.slice(i, i + BATCH_SIZE));
     }
 
+    // Also split original IDs into matching batches for tracking
+    const idBatches: number[][] = [];
+    for (let i = 0; i < fullRecords.length; i += BATCH_SIZE) {
+      idBatches.push(fullRecords.slice(i, i + BATCH_SIZE).map((r) => r.id));
+    }
+
+    const successfullyMigratedIds: number[] = [];
+
     progress.totalBatches = batches.length;
     progress.status = 'migrating';
     onProgress({ ...progress });
@@ -303,6 +324,16 @@ export async function migrateAllRecords(
           progress.skippedList.push(...response.skippedList);
         }
 
+        // Track successfully sent record IDs (exclude skipped CNICs)
+        const skippedCnics = new Set(response.skippedList || []);
+        const batchRecordIds = idBatches[i];
+        const batchMigrationRecords = batches[i];
+        for (let j = 0; j < batchMigrationRecords.length; j++) {
+          if (!skippedCnics.has(batchMigrationRecords[j].cnic)) {
+            successfullyMigratedIds.push(batchRecordIds[j]);
+          }
+        }
+
         console.log(`[Migration] Batch ${i + 1} complete: ${recordsProcessed} processed, ${response.skipped || 0} skipped`);
         onProgress({ ...progress });
       } catch (err) {
@@ -324,6 +355,17 @@ export async function migrateAllRecords(
         }
         
         onProgress({ ...progress });
+      }
+    }
+
+    // Step 4: Mark successfully migrated records in our DB
+    if (successfullyMigratedIds.length > 0) {
+      try {
+        console.log(`[Migration] Marking ${successfullyMigratedIds.length} records with batch ID: ${batchId}`);
+        await adminApi.markRecordsMigrated(successfullyMigratedIds, batchId);
+      } catch (err) {
+        console.error('[Migration] Failed to mark records as migrated:', err);
+        // Don't fail the whole migration for this — records were already sent
       }
     }
 

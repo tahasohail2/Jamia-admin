@@ -677,6 +677,7 @@ tr:hover {
   font-size: 12px;
   font-weight: 600;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .badge-new {
@@ -687,6 +688,49 @@ tr:hover {
 .badge-existing {
   background-color: #d1ecf1;
   color: #0c5460;
+}
+
+.badge-status-approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-status-disapproved {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge-status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Approval dropdown in edit modal */
+.approval-dropdown-edit {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.approval-dropdown-edit:focus {
+  outline: none;
+  border-color: #058464;
+  box-shadow: 0 0 0 3px rgba(5, 132, 100, 0.1);
+}
+
+.approval-dropdown-edit.approved {
+  border-color: #28a745;
+  background-color: #f0fff4;
+}
+
+.approval-dropdown-edit.disapproved {
+  border-color: #dc3545;
+  background-color: #fff5f5;
 }
 
 .btn-delete-small {
@@ -1403,7 +1447,7 @@ tr:hover {
 .student-picture {
   width: 50px;
   height: 50px;
-  object-fit: cover;
+  object-fit: fit;
   border-radius: 4px;
   cursor: pointer;
   transition: transform 0.2s;

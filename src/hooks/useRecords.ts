@@ -5,21 +5,24 @@ import { StudentRecord, RecordFilters, PaginatedResponse } from '../types';
 const DEFAULT_PAGE_SIZE = 50;
 const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
 
-export const useRecords = () => {
+export const useRecords = (initialFilters?: RecordFilters) => {
   const [records, setRecords] = useState<StudentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<RecordFilters>({});
+  const [filters, setFilters] = useState<RecordFilters>(initialFilters || {});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [pageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const autoRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasFetchedRef = useRef(false);
 
-  const fetchRecords = useCallback(async () => {
+  const fetchRecords = useCallback(async (silent = false) => {
     try {
-      setIsLoading(true);
+      if (!silent) {
+        setIsLoading(true);
+      }
       setError(null);
 
       const response: PaginatedResponse<StudentRecord> = await adminApi.getRecords({
@@ -32,12 +35,17 @@ export const useRecords = () => {
       setTotalPages(response.pagination.totalPages);
       setTotalRecords(response.pagination.totalRecords);
       setCurrentPage(response.pagination.currentPage);
+      hasFetchedRef.current = true;
     } catch (err) {
       console.error('Failed to fetch records:', err);
-      setError('Failed to load records');
-      setRecords([]);
+      if (!silent) {
+        setError('Failed to load records');
+        setRecords([]);
+      }
     } finally {
-      setIsLoading(false);
+      if (!silent) {
+        setIsLoading(false);
+      }
     }
   }, [filters, currentPage, pageSize]);
 
@@ -46,10 +54,10 @@ export const useRecords = () => {
     fetchRecords();
   }, [fetchRecords]);
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 30 seconds (silent — no loading spinner)
   useEffect(() => {
     autoRefreshTimerRef.current = setInterval(() => {
-      fetchRecords();
+      fetchRecords(true);
     }, AUTO_REFRESH_INTERVAL);
 
     return () => {

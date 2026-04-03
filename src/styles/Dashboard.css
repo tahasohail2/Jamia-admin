@@ -55,6 +55,10 @@
   transform: translateY(-2px);
 }
 
+.kpi-card.clickable {
+  cursor: pointer;
+}
+
 .kpi-icon {
   width: 56px;
   height: 56px;
@@ -484,4 +488,190 @@
 
 .migrate-close-btn:hover {
   background: #e0e0e0;
+}
+
+/* Migration Stepper Modal */
+.migration-stepper-modal {
+  max-width: 520px;
+}
+
+.stepper-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 24px 0;
+  gap: 0;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+}
+
+.stepper-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  background: #e9ecef;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.stepper-step.active .stepper-circle {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.stepper-step.completed .stepper-circle {
+  background: #28a745;
+  color: white;
+}
+
+.stepper-label {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+}
+
+.stepper-step.active .stepper-label {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.stepper-step.completed .stepper-label {
+  color: #28a745;
+}
+
+.stepper-line {
+  flex: 1;
+  height: 2px;
+  background: #e9ecef;
+  margin: 0 8px;
+  margin-bottom: 22px;
+  transition: background 0.3s ease;
+}
+
+.stepper-line.completed {
+  background: #28a745;
+}
+
+/* Migration Review Step */
+.migration-review-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.migration-info-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.migration-info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.migration-info-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.migration-info-label {
+  flex: 1;
+  font-size: 14px;
+  color: #555;
+}
+
+.migration-info-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  direction: ltr;
+}
+
+.migration-info-value.approved-count {
+  color: #28a745;
+  font-size: 20px;
+}
+
+.migration-review-note {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.migration-status-text.success {
+  color: #28a745;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.migration-status-text.error {
+  color: #dc3545;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Migration Batch Badge */
+.badge-migrated {
+  background: #d4edda;
+  color: #155724;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+  direction: ltr;
+  display: inline-block;
+}
+
+.badge-not-migrated {
+  background: #f0f0f0;
+  color: #999;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Migration Batch ID in Result Step */
+.migration-batch-id-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0f4ff;
+  border: 1px solid #d0d9f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.migration-batch-id-label {
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+}
+
+.migration-batch-id-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #667eea;
+  font-family: monospace;
 }

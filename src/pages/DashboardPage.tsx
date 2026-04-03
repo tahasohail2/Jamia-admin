@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { adminApi } from '../services/adminApi';
 import '../styles/Dashboard.css';
@@ -12,6 +13,7 @@ interface DashboardStats {
 }
 
 const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalEntries: 0,
     approvedEntries: 0,
@@ -86,6 +88,11 @@ const DashboardPage: React.FC = () => {
 
   const maxCount = Math.max(...stats.recentEntries.map(e => e.count), 1);
 
+  const navigateToResults = (approvalStatus?: string) => {
+    const params = approvalStatus ? `?approvalStatus=${approvalStatus}` : '';
+    navigate(`/results${params}`);
+  };
+
   return (
     <DashboardLayout>
       <div className="dashboard-page">
@@ -103,7 +110,7 @@ const DashboardPage: React.FC = () => {
           <>
             {/* KPI Cards */}
             <div className="kpi-grid">
-              <div className="kpi-card">
+              <div className="kpi-card clickable" onClick={() => navigateToResults()}>
                 <div className="kpi-icon total">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -118,7 +125,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="kpi-card">
+              <div className="kpi-card clickable" onClick={() => navigateToResults('approved')}>
                 <div className="kpi-icon approved">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -134,7 +141,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="kpi-card">
+              <div className="kpi-card clickable" onClick={() => navigateToResults('disapproved')}>
                 <div className="kpi-icon disapproved">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="10" />
@@ -151,7 +158,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="kpi-card">
+              <div className="kpi-card clickable" onClick={() => navigateToResults('pending')}>
                 <div className="kpi-icon pending">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="10" />

@@ -7,7 +7,6 @@ interface RecordsTableProps {
   onRecordClick: (record: StudentRecord) => void;
   onEditClick: (record: StudentRecord) => void;
   onDeleteClick: (record: StudentRecord) => void;
-  onApprovalChange: (recordId: number, status: 'approved' | 'disapproved' | 'pending' | null) => void;
 }
 
 const RecordsTable: React.FC<RecordsTableProps> = ({
@@ -16,7 +15,6 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
   onRecordClick,
   onEditClick,
   onDeleteClick,
-  onApprovalChange,
 }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -69,8 +67,10 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
             <th>شناختی کارڈ</th>
             <th>فون</th>
             <th>اسٹیٹس</th>
+            <th>منظوری کا وقت</th>
             <th>تصویر</th>
             <th>جمع کرانے کا وقت</th>
+            <th>منتقلی</th>
             <th>اقدامات</th>
           </tr>
         </thead>
@@ -97,21 +97,14 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               <td>{record.cnic}</td>
               <td>{record.phone}</td>
               <td>
-                <select
-                  className={`approval-dropdown ${record.approvalStatus || ''}`}
-                  value={record.approvalStatus || 'pending'}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    const value = e.target.value;
-                    const status = value === 'pending' ? null : (value as 'approved' | 'disapproved');
-                    onApprovalChange(record.id, status);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <option value="pending">اسٹیٹس منتخب کریں</option>
-                  <option value="approved">منظور شدہ</option>
-                  <option value="disapproved">مسترد</option>
-                </select>
+                <span className={`badge badge-status-${record.approvalStatus || 'pending'}`}>
+                  {record.approvalStatus === 'approved' ? 'منظور شدہ' : record.approvalStatus === 'disapproved' ? 'مسترد' : 'زیر التواء'}
+                </span>
+              </td>
+              <td>
+                {record.approvalStatus === 'approved' && record.approvedAt
+                  ? formatDateTime(record.approvedAt)
+                  : '—'}
               </td>
               <td className="picture-cell">
                 {record.additionalUrls && record.additionalUrls.length > 0 ? (
@@ -129,6 +122,15 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
                 )}
               </td>
               <td>{formatDateTime(record.submittedAt)}</td>
+              <td>
+                {record.migrationBatchId ? (
+                  <span className="badge badge-migrated" title={record.migratedAt ? formatDateTime(record.migratedAt) : ''}>
+                    {record.migrationBatchId}
+                  </span>
+                ) : (
+                  <span className="badge badge-not-migrated">غیر منتقل</span>
+                )}
+              </td>
               <td>
                 <div className="action-buttons">
                   <button

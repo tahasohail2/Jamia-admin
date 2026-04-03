@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext';
 import MigrationModal from './MigrationModal';
 import CancelConfirmDialog from './CancelConfirmDialog';
 
-const MigrateButton: React.FC = () => {
+const MigrateButton: React.FC<{ onMigrationComplete?: () => void }> = ({ onMigrationComplete }) => {
   const { showToast } = useToast();
   const [progress, setProgress] = useState<MigrationProgress | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,9 +71,10 @@ const MigrateButton: React.FC = () => {
       const inserted = result.inserted || 0;
       const skipped = result.skipped || 0;
       showToast(
-        `منتقلی مکمل: ${inserted} داخل، ${skipped} چھوڑے گئے`,
+        `منظور شدہ منتقلی مکمل: ${inserted} داخل، ${skipped} چھوڑے گئے`,
         skipped > 0 ? 'warning' : 'success'
       );
+      onMigrationComplete?.();
     } else if (result.status === 'error') {
       // Don't show toast if it was cancelled (already shown in handleConfirmCancel)
       if (result.errorMessage !== 'منتقلی منسوخ کر دی گئی') {
@@ -97,7 +98,7 @@ const MigrateButton: React.FC = () => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
           <path d="M12 5v14M5 12l7-7 7 7" />
         </svg>
-        ڈیٹا منتقل کریں
+        منظور شدہ منتقل کریں
       </button>
 
       <MigrationModal
@@ -126,7 +127,7 @@ const MigrateButton: React.FC = () => {
               )}
             </div>
             <div className="migration-minimized-text">
-              <span className="migration-minimized-title">ڈیٹا منتقلی</span>
+              <span className="migration-minimized-title">منظور شدہ منتقلی</span>
               {isRunning ? (
                 <span className="migration-minimized-status">{percentage}% مکمل</span>
               ) : (

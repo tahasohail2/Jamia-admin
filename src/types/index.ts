@@ -13,8 +13,11 @@ export interface StudentRecord {
   registrationNo: string;
   submittedAt: string;
   approvalStatus?: 'approved' | 'disapproved' | 'pending' | null;
+  approvedAt?: string | null;
   pictureUrl?: string;
   additionalUrls?: string[];
+  migrationBatchId?: string | null;
+  migratedAt?: string | null;
 }
 
 export interface FullStudentRecord extends StudentRecord {
@@ -31,6 +34,7 @@ export interface FullStudentRecord extends StudentRecord {
   examPart2Marks: string;
   totalMarks: string;
   remarks: string;
+  approvalComments?: string;
   certificateUrls?: string[];
   cnicUrls?: string[];
   additionalUrls?: string[];
@@ -92,6 +96,7 @@ export interface RecordFilters {
   gender?: string;
   department?: string;
   approvalStatus?: string;
+  migrationBatchId?: string;
   page?: number;
   pageSize?: number;
 }
@@ -122,4 +127,11 @@ export interface Toast {
   id: string;
   message: string;
   type: ToastType;
+}
+
+// Migration Batch Types
+export interface MigrationBatch {
+  batchId: string;
+  migratedAt: string;
+  totalRecords: number;
 }

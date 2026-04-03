@@ -40,6 +40,8 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({
         lastYearGrade: record.lastYearGrade,
         nextYearGrade: record.nextYearGrade,
         remarks: record.remarks,
+        approvalStatus: record.approvalStatus || undefined,
+        approvalComments: record.approvalComments || '',
       });
     }
   }, [record]);
@@ -190,6 +192,36 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({
                 <div className="edit-field full-width">
                   <label>ملاحظات</label>
                   <textarea value={formData.remarks || ''} onChange={(e) => handleChange('remarks', e.target.value)} rows={3} />
+                </div>
+              </div>
+            </div>
+            {/* Approval & Comments */}
+            <div className="detail-section">
+              <h3 className="section-title">منظوری کی تفصیلات</h3>
+              <div className="edit-grid">
+                <div className="edit-field">
+                  <label>اسٹیٹس</label>
+                  <select
+                    className={`approval-dropdown-edit ${formData.approvalStatus || 'pending'}`}
+                    value={formData.approvalStatus || 'pending'}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleChange('approvalStatus', value === 'pending' ? '' : value);
+                    }}
+                  >
+                    <option value="pending">زیر التواء</option>
+                    <option value="approved">منظور شدہ</option>
+                    <option value="disapproved">مسترد</option>
+                  </select>
+                </div>
+                <div className="edit-field full-width">
+                  <label>تبصرے (منظوری / عدم منظوری کی وجہ)</label>
+                  <textarea
+                    value={formData.approvalComments || ''}
+                    onChange={(e) => handleChange('approvalComments', e.target.value)}
+                    rows={4}
+                    placeholder="منظوری یا عدم منظوری کی وجہ یہاں لکھیں..."
+                  />
                 </div>
               </div>
             </div>

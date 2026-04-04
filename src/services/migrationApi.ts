@@ -2,9 +2,9 @@ import { adminApi } from './adminApi';
 import type { FullStudentRecord } from '../types';
 import axios from 'axios';
 
-const BATCH_SIZE = 3; // Reduced from 5 to 3 for better reliability
-const FETCH_DELAY_MS = 500; // Increased from 200ms to 500ms to avoid 429 errors
-const BATCH_DELAY_MS = 1000; // 1 second delay between batches
+const BATCH_SIZE = 3;
+const FETCH_DELAY_MS = 500;
+const BATCH_DELAY_MS = 1000;
 
 let isCancelled = false;
 
@@ -105,8 +105,6 @@ function toMigrationRecord(record: FullStudentRecord): MigrationRecord {
 
 async function sendBatch(records: MigrationRecord[], retryCount = 0): Promise<BulkInsertResponse> {
   const MAX_RETRIES = 2;
-  
-  console.log(`[Migration] Sending batch of ${records.length} records to API... (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
 
   try {
     const res = await axios.post<BulkInsertResponse>(
@@ -117,39 +115,33 @@ async function sendBatch(records: MigrationRecord[], retryCount = 0): Promise<Bu
         headers: { 'Content-Type': 'application/json' },
       }
     );
-    
-    console.log('[Migration] Response status:', res.status);
-    console.log('[Migration] Response data:', JSON.stringify(res.data));
-    
+
     if (!res.data || typeof res.data !== 'object') {
       throw new Error('Invalid response format from migration API');
     }
-    
+
     return {
       success: res.data.success ?? false,
       AllResponseslists: res.data.AllResponseslists ?? [],
     };
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      console.error('[Migration] API error:', err.response?.status, err.message);
-      
       if (retryCount < MAX_RETRIES) {
         if (err.code === 'ECONNABORTED' || err.response?.status === 429 || err.response?.status === 503) {
           const waitTime = (retryCount + 1) * 2000;
-          console.log(`[Migration] Retrying after ${waitTime}ms...`);
           await new Promise((r) => setTimeout(r, waitTime));
           return sendBatch(records, retryCount + 1);
         }
       }
-      
+
       if (err.code === 'ECONNABORTED') throw new Error('Request timeout - migration API took too long to respond');
       if (err.response?.status === 429) throw new Error('Too many requests - please wait and try again');
       if (err.response?.status === 500) throw new Error('Migration API server error');
       if (err.response?.status === 503) throw new Error('Migration API temporarily unavailable');
-      
+
       throw new Error(err.response?.data?.message || err.message || 'Failed to send batch');
     }
-    
+
     if (err instanceof Error) throw err;
     throw new Error('Unknown error occurred during batch migration');
   }
@@ -167,11 +159,10 @@ function generateBatchId(): string {
 export async function migrateAllRecords(
   onProgress: (progress: MigrationProgress) => void
 ): Promise<MigrationProgress> {
-  // Reset cancellation flag
   isCancelled = false;
 
   const batchId = generateBatchId();
-  
+
   const progress: MigrationProgress = {
     totalRecords: 0,
     totalBatches: 0,
@@ -188,9 +179,7 @@ export async function migrateAllRecords(
   onProgress({ ...progress });
 
   try {
-    // Step 1: Fetch only approved records that haven't been migrated yet
     const listResponse = await adminApi.getRecords({ pageSize: 10000, approvalStatus: 'approved', migrationBatchId: 'not_migrated' });
-    // Filter to only records that have a registration number
     const recordsWithRegNo = listResponse.data.filter((r) => r.registrationNo && r.registrationNo.trim() !== '');
     progress.totalRecords = recordsWithRegNo.length;
 
@@ -200,7 +189,6 @@ export async function migrateAllRecords(
       return progress;
     }
 
-    // Check if cancelled
     if (isCancelled) {
       progress.status = 'error';
       progress.errorMessage = 'منتقلی منسوخ کر دی گئی';
@@ -208,47 +196,33 @@ export async function migrateAllRecords(
       return progress;
     }
 
-    // Step 2: Fetch full details one at a time with delay to avoid 429
     const fullRecords: FullStudentRecord[] = [];
     const recordIds = recordsWithRegNo.map((r) => r.id);
 
-    console.log(`[Migration] Starting to fetch ${recordIds.length} full records...`);
-    
     for (let i = 0; i < recordIds.length; i++) {
-      // Check if cancelled
       if (isCancelled) {
         progress.status = 'error';
         progress.errorMessage = 'منتقلی منسوخ کر دی گئی';
         onProgress({ ...progress });
         return progress;
       }
-      
-      // Add delay before each request (including the first one to be safe)
+
       if (i > 0) {
         await new Promise((r) => setTimeout(r, FETCH_DELAY_MS));
       }
-      
+
       try {
-        console.log(`[Migration] Fetching record ${i + 1}/${recordIds.length} (ID: ${recordIds[i]})`);
         const record = await adminApi.getRecordById(recordIds[i]);
         fullRecords.push(record);
-        
-        // Update progress with fetched count
         progress.fetchedRecords = i + 1;
         onProgress({ ...progress });
       } catch (err) {
-        console.warn(`[Migration] Failed to fetch record ID ${recordIds[i]}, skipping`, err);
-        
-        // If we get a 429 error, wait longer before continuing
         if (err instanceof Error && err.message.includes('429')) {
-          console.log('[Migration] Rate limit hit, waiting 2 seconds before continuing...');
           await new Promise((r) => setTimeout(r, 2000));
         }
       }
     }
-    console.log(`[Migration] Total full records ready: ${fullRecords.length}`);
 
-    // Check if cancelled
     if (isCancelled) {
       progress.status = 'error';
       progress.errorMessage = 'منتقلی منسوخ کر دی گئی';
@@ -256,22 +230,18 @@ export async function migrateAllRecords(
       return progress;
     }
 
-    // Step 3: Split into batches and send
     const migrationRecords = fullRecords.map(toMigrationRecord);
     const batches: MigrationRecord[][] = [];
-
     for (let i = 0; i < migrationRecords.length; i += BATCH_SIZE) {
       batches.push(migrationRecords.slice(i, i + BATCH_SIZE));
     }
 
-    // Also split original IDs into matching batches for tracking
     const idBatches: number[][] = [];
     for (let i = 0; i < fullRecords.length; i += BATCH_SIZE) {
       idBatches.push(fullRecords.slice(i, i + BATCH_SIZE).map((r) => r.id));
     }
 
     const successfullyMigratedIds: number[] = [];
-    // Collect all Jamia responses to process after all batches
     const allJamiaResponses: JamiaResponseItem[] = [];
 
     progress.totalBatches = batches.length;
@@ -285,20 +255,17 @@ export async function migrateAllRecords(
         onProgress({ ...progress });
         return progress;
       }
-      
+
       try {
         if (i > 0) {
           await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
         }
-        
-        console.log(`[Migration] Sending batch ${i + 1}/${batches.length}...`);
-        const response = await sendBatch(batches[i]);
 
+        const response = await sendBatch(batches[i]);
         progress.completedBatches = i + 1;
 
         if (response.AllResponseslists) {
           allJamiaResponses.push(...response.AllResponseslists);
-
           for (const item of response.AllResponseslists) {
             if (item.Status === 'Admitted') progress.admitted++;
             else if (item.Status === 'Denied') progress.denied++;
@@ -309,37 +276,23 @@ export async function migrateAllRecords(
           }
         }
 
-        // All records in this batch were sent successfully (regardless of Jamia's per-record status)
         successfullyMigratedIds.push(...idBatches[i]);
-
-        console.log(`[Migration] Batch ${i + 1} complete`);
         onProgress({ ...progress });
       } catch (err) {
-        console.error(`[Migration] Failed to send batch ${i + 1}/${batches.length}:`, err);
         progress.completedBatches = i + 1;
-        
-        if (err instanceof Error) {
-          if (err.message.includes('429') || err.message.includes('Too many requests')) {
-            await new Promise((r) => setTimeout(r, 3000));
-          }
+        if (err instanceof Error && (err.message.includes('429') || err.message.includes('Too many requests'))) {
+          await new Promise((r) => setTimeout(r, 3000));
         }
-        
         onProgress({ ...progress });
       }
     }
 
-    // Step 4: Mark all sent records with batch ID
     if (successfullyMigratedIds.length > 0) {
       try {
-        console.log(`[Migration] Marking ${successfullyMigratedIds.length} records with batch ID: ${batchId}`);
         await adminApi.markRecordsMigrated(successfullyMigratedIds, batchId);
-      } catch (err) {
-        console.error('[Migration] Failed to mark records as migrated:', err);
-      }
+      } catch (_) { /* records were already sent */ }
     }
 
-    // Step 5: Update statuses based on Jamia response
-    // Build a CNIC→ID map from the records we sent
     const cnicToId = new Map<string, number>();
     for (const rec of fullRecords) {
       cnicToId.set(rec.cnic, rec.id);
@@ -364,21 +317,14 @@ export async function migrateAllRecords(
 
     if (statusUpdates.length > 0) {
       try {
-        console.log(`[Migration] Updating ${statusUpdates.length} record statuses from Jamia response`);
         await adminApi.bulkUpdateStatuses(statusUpdates);
-      } catch (err) {
-        console.error('[Migration] Failed to update statuses:', err);
-      }
+      } catch (_) { /* non-critical */ }
     }
 
-    // Step 6: Clear batch ID for validation-failed records so they can be resent
     if (validationFailedIds.length > 0) {
       try {
-        console.log(`[Migration] Clearing batch ID for ${validationFailedIds.length} validation-failed records`);
         await adminApi.clearMigrationBatch(validationFailedIds);
-      } catch (err) {
-        console.error('[Migration] Failed to clear batch for validation-failed records:', err);
-      }
+      } catch (_) { /* non-critical */ }
     }
 
     progress.status = 'done';

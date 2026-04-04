@@ -35,6 +35,7 @@ export interface FullStudentRecord extends StudentRecord {
   totalMarks: string;
   remarks: string;
   approvalComments?: string;
+  migrationComment?: string;
   certificateUrls?: string[];
   cnicUrls?: string[];
   additionalUrls?: string[];

@@ -190,9 +190,11 @@ export async function migrateAllRecords(
   try {
     // Step 1: Fetch only approved records that haven't been migrated yet
     const listResponse = await adminApi.getRecords({ pageSize: 10000, approvalStatus: 'approved', migrationBatchId: 'not_migrated' });
-    progress.totalRecords = listResponse.data.length;
+    // Filter to only records that have a registration number
+    const recordsWithRegNo = listResponse.data.filter((r) => r.registrationNo && r.registrationNo.trim() !== '');
+    progress.totalRecords = recordsWithRegNo.length;
 
-    if (listResponse.data.length === 0) {
+    if (recordsWithRegNo.length === 0) {
       progress.status = 'done';
       onProgress({ ...progress });
       return progress;
@@ -208,7 +210,7 @@ export async function migrateAllRecords(
 
     // Step 2: Fetch full details one at a time with delay to avoid 429
     const fullRecords: FullStudentRecord[] = [];
-    const recordIds = listResponse.data.map((r) => r.id);
+    const recordIds = recordsWithRegNo.map((r) => r.id);
 
     console.log(`[Migration] Starting to fetch ${recordIds.length} full records...`);
     

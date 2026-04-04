@@ -713,3 +713,13 @@
 .migration-failures-table tr:nth-child(even) {
   background: #fff8f8;
 }
+
+/* Migration Comment Read-only */
+.migration-comment-readonly {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  cursor: not-allowed;
+  font-size: 13px;
+  resize: none;
+}

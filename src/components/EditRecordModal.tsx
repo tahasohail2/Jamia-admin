@@ -223,6 +223,17 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({
                     placeholder="منظوری یا عدم منظوری کی وجہ یہاں لکھیں..."
                   />
                 </div>
+                {record.migrationComment && (
+                  <div className="edit-field full-width">
+                    <label>جامعہ API کا جواب</label>
+                    <textarea
+                      value={record.migrationComment}
+                      readOnly
+                      rows={2}
+                      className="migration-comment-readonly"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

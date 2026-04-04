@@ -1,0 +1,78 @@
+Work Flow for Jamia Admission Process.
+
+Step 1: Student will come to Registration form. Add their personal and academic information. Students record can be off two type. New and Old. 
+		Old Student will have Registration Number and it will also have Previous class/darja selection.
+
+Step 2: Admin will login into Admin Pannel.	He will review Student List.
+		Admin can edit Student with following status (Approved, Rected, Pending) Admin can Approve/reject Student (Update Status)
+		
+Step 3: Admin can send approved students list to Jamia for Admission. Approved Student List will contains all stuedents record.
+		When ADMIN click on Submit Admissions button. Popup will apear. 
+			POPUP will contain following information
+			Submission Date/TIME (Current-ReadOnly)
+			Count of Approved Students to be submitted.
+			After viewiwing popup message, admin can click Call/Post/Submit Admission button.
+			Upon submission, Loader dialog will appear on page showoing progress for Admission Process. At this we can show count for data packets send.
+			
+			When Sending Data, we should mark Send Date/Time and Give them unique ID to mark them as Batch so that Admin can track Students record when they r send to Jamia
+
+Step 4: API call will have two types of Reply Success/Failed. Success Response will have two lists. 
+					API FAIL CASES
+					NO CHANGE IN EXISTING APPROVED SUBMITTED STUDENTS RECORD in case of failed.
+						Failed cases. - API NOT RESPONDING.LINK DOWN. TIMEOUT. THOSE R ALL WHEN U HAVE ERROR/EXCEPTION Response. 
+					API SUCESS Response. (CERTAIN DATA)
+						LIST OF STUDENTS where VALIDATIONS are failing. IN THAT CASE NO CHANGE IN Student Status and record is editable.
+						LIST OF STUDENS Marked Admitted/DENIED
+					List of students those are Accepted/Passed. List of Students those are rejected for admissions. 	
+
+Step 5: After API response, In case of success, Code will update the student STSTUS to Admittted or DENIED . After this status changes student record will not editable. 
+		AFTER THIS STATUS UPDATE Admin can only view Record.
+		In case of Validation/error. Admin will correct/edit the record and will resend it in new batch.
+Step 6: After API response, Code will generate Batch Number and update for all those approved students where status is changed to admitted/denied. 
+		Batch number will be displayed in successful message
+		
+NON EDITABLE DATA CAN BE VIEWED FOR DETAIL BUT IN READONLY FORMAT.
+
+
+STUDENT CAN HAVE FIVE TYPE OF STATUS
+Pending (At the time of submission) ( STUDENT RECORD EDITABLE)
+Approved (ADMIN CAN DO THAT) (STUDENT RECORD EDITABLE)
+Rejected (ADMIN CAN DO THAT) (STUDENT RECORD EDITABLE)
+
+Admitted (VIA JAMIA API RESPONSE) (STUDENT RECORD NOW WILL BE ONLY Viewbale)
+DENIED  (VIA JAMIA API RESPONSE) (STUDENT RECORD NOW WILL BE ONLY Viewbale)
+
+[
+	{
+		CNICNumber, 
+		Status, 
+		Comment
+	}, 
+	{
+		CNICNumber, 
+		Status, 
+		Comment
+	}, 
+]
+API Admission Process. 
+
+We will have POST method API in Jamia Project. It will expose method by the name 
+GetAdmissions. 
+This method will accept list of Students Approved via Admission Registration Process. 
+There will be two types of students. Old Existing. (Registration number)
+Step 1: Validate Students List.
+			1 -> Validate records for mandatory field checks
+			2 -> Validate for duplicate CNIC
+			3 -> In case of New check if cnic exists against existing student records
+			4 -> In case registration Number provided but record does not exists
+			5 -> In case registration number provided but Previous session provided is Invaid
+			Student will marked Validation Failed. Invalid information  
+			Validation fail will not go to step 2
+
+Step 2 : New Students. Fully admitted.
+			Add record in relvant tables ( for now temp) but on live/real will update /replace table name to real table.
+			Marked Statudent as Admitted. (Status)
+Step 3: Existing Students.
+			Check for Fails. If student is failed in previous category/appearance. Set status to denied. Reason is Failed.
+			Else Add record in relvant tables ( for now temp) but on live/real will update /replace table name to real table.
+			Marked Statudent as Admitted. (Status)

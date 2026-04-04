@@ -39,9 +39,10 @@ const MigrationModal: React.FC<MigrationModalProps> = ({
     if (isOpen && !progress) {
       setLoadingCount(true);
       adminApi
-        .getRecords({ approvalStatus: 'approved', migrationBatchId: 'not_migrated', pageSize: 1 })
+        .getRecords({ approvalStatus: 'approved', migrationBatchId: 'not_migrated', pageSize: 10000 })
         .then((res) => {
-          setApprovedCount(res.pagination.totalRecords);
+          const withRegNo = res.data.filter((r) => r.registrationNo && r.registrationNo.trim() !== '');
+          setApprovedCount(withRegNo.length);
         })
         .catch(() => {
           setApprovedCount(null);

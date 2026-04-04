@@ -68,12 +68,14 @@ const MigrateButton: React.FC<{ onMigrationComplete?: () => void }> = ({ onMigra
     const result = await migrateAllRecords(setProgress);
 
     if (result.status === 'done') {
-      const inserted = result.inserted || 0;
-      const skipped = result.skipped || 0;
-      showToast(
-        `منظور شدہ منتقلی مکمل: ${inserted} داخل، ${skipped} چھوڑے گئے`,
-        skipped > 0 ? 'warning' : 'success'
-      );
+      const admitted = result.admitted || 0;
+      const denied = result.denied || 0;
+      const vFailed = result.validationFailed || 0;
+      if (vFailed > 0) {
+        showToast(`منتقلی مکمل: ${admitted} داخل، ${denied} مسترد، ${vFailed} توثیق ناکام`, 'warning');
+      } else {
+        showToast(`منتقلی مکمل: ${admitted} داخل، ${denied} مسترد`, 'success');
+      }
       onMigrationComplete?.();
     } else if (result.status === 'error') {
       // Don't show toast if it was cancelled (already shown in handleConfirmCancel)

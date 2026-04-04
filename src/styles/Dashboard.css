@@ -675,3 +675,41 @@
   color: #667eea;
   font-family: monospace;
 }
+
+.migration-stat-warning {
+  color: #856404;
+  font-weight: 600;
+}
+
+/* Migration Failures Table */
+.migration-failures-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border: 1px solid #fed7d7;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.migration-failures-table th {
+  background: #fff0f0;
+  color: #c53030;
+  font-weight: 600;
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid #fed7d7;
+}
+
+.migration-failures-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #fef2f2;
+  color: #742a2a;
+}
+
+.migration-failures-table tr:last-child td {
+  border-bottom: none;
+}
+
+.migration-failures-table tr:nth-child(even) {
+  background: #fff8f8;
+}

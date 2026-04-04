@@ -260,6 +260,28 @@ class AdminApi {
       throw new Error('An unexpected error occurred');
     }
   }
+
+  async bulkUpdateStatuses(updates: { id: number; status: string; comment: string }[]): Promise<void> {
+    try {
+      await axiosInstance.post('/api/admin/records/bulk-update-status', { updates });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to bulk update statuses');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async clearMigrationBatch(recordIds: number[]): Promise<void> {
+    try {
+      await axiosInstance.post('/api/admin/records/clear-migration-batch', { recordIds });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to clear migration batch');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
 }
 
 export const adminApi = new AdminApi();

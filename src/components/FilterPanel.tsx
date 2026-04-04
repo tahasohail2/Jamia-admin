@@ -116,6 +116,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, refr
             <option value="approved">منظور شدہ</option>
             <option value="disapproved">مسترد</option>
             <option value="pending">زیر التواء</option>
+            <option value="admitted">داخلہ</option>
+            <option value="denied">مسترد (جامعہ)</option>
           </select>
         </div>
 

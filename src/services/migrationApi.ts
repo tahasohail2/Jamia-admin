@@ -46,21 +46,25 @@ interface MigrationRecord {
   approvedAt?: string;
 }
 
+interface JamiaResponseItem {
+  CNICNumber: string;
+  Status: 'ValidationFailed' | 'Admitted' | 'Denied';
+  Comment: string;
+}
+
 interface BulkInsertResponse {
   success: boolean;
-  inserted?: number;
-  updated?: number;
-  skipped?: number;
-  skippedList?: string[];
+  AllResponseslists?: JamiaResponseItem[];
 }
 
 export interface MigrationProgress {
   totalRecords: number;
   totalBatches: number;
   completedBatches: number;
-  inserted: number;
-  skipped: number;
-  skippedList: string[];
+  admitted: number;
+  denied: number;
+  validationFailed: number;
+  validationFailedList: { cnic: string; comment: string }[];
   status: 'idle' | 'fetching' | 'migrating' | 'done' | 'error';
   errorMessage?: string;
   fetchedRecords?: number;
@@ -103,75 +107,50 @@ async function sendBatch(records: MigrationRecord[], retryCount = 0): Promise<Bu
   const MAX_RETRIES = 2;
   
   console.log(`[Migration] Sending batch of ${records.length} records to API... (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
-  console.log('[Migration] Request payload:', JSON.stringify(records, null, 2));
 
   try {
     const res = await axios.post<BulkInsertResponse>(
       `${MIGRATION_API_URL}/Home/BulkInsertStudents`,
       records,
       {
-        timeout: 60000, // Increased to 60 seconds
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        timeout: 60000,
+        headers: { 'Content-Type': 'application/json' },
       }
     );
     
     console.log('[Migration] Response status:', res.status);
-    console.log('[Migration] Response data:', res.data);
+    console.log('[Migration] Response data:', JSON.stringify(res.data));
     
-    // Validate response structure
     if (!res.data || typeof res.data !== 'object') {
       throw new Error('Invalid response format from migration API');
     }
     
-    // Ensure all numeric fields have default values
     return {
       success: res.data.success ?? false,
-      inserted: res.data.inserted ?? 0,
-      updated: res.data.updated ?? 0,
-      skipped: res.data.skipped ?? 0,
-      skippedList: res.data.skippedList ?? [],
+      AllResponseslists: res.data.AllResponseslists ?? [],
     };
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      console.error('[Migration] API error status:', err.response?.status);
-      console.error('[Migration] API error data:', err.response?.data);
-      console.error('[Migration] API error message:', err.message);
+      console.error('[Migration] API error:', err.response?.status, err.message);
       
-      // Retry logic for specific errors
       if (retryCount < MAX_RETRIES) {
         if (err.code === 'ECONNABORTED' || err.response?.status === 429 || err.response?.status === 503) {
-          const waitTime = (retryCount + 1) * 2000; // 2s, 4s, 6s...
+          const waitTime = (retryCount + 1) * 2000;
           console.log(`[Migration] Retrying after ${waitTime}ms...`);
           await new Promise((r) => setTimeout(r, waitTime));
           return sendBatch(records, retryCount + 1);
         }
       }
       
-      if (err.code === 'ECONNABORTED') {
-        throw new Error('Request timeout - migration API took too long to respond');
-      }
-      
-      if (err.response?.status === 429) {
-        throw new Error('Too many requests - please wait and try again');
-      }
-      
-      if (err.response?.status === 500) {
-        throw new Error('Migration API server error');
-      }
-      
-      if (err.response?.status === 503) {
-        throw new Error('Migration API temporarily unavailable');
-      }
+      if (err.code === 'ECONNABORTED') throw new Error('Request timeout - migration API took too long to respond');
+      if (err.response?.status === 429) throw new Error('Too many requests - please wait and try again');
+      if (err.response?.status === 500) throw new Error('Migration API server error');
+      if (err.response?.status === 503) throw new Error('Migration API temporarily unavailable');
       
       throw new Error(err.response?.data?.message || err.message || 'Failed to send batch');
     }
     
-    if (err instanceof Error) {
-      throw err;
-    }
-    
+    if (err instanceof Error) throw err;
     throw new Error('Unknown error occurred during batch migration');
   }
 }
@@ -197,9 +176,10 @@ export async function migrateAllRecords(
     totalRecords: 0,
     totalBatches: 0,
     completedBatches: 0,
-    inserted: 0,
-    skipped: 0,
-    skippedList: [],
+    admitted: 0,
+    denied: 0,
+    validationFailed: 0,
+    validationFailedList: [],
     status: 'fetching',
     fetchedRecords: 0,
     batchId,
@@ -289,13 +269,14 @@ export async function migrateAllRecords(
     }
 
     const successfullyMigratedIds: number[] = [];
+    // Collect all Jamia responses to process after all batches
+    const allJamiaResponses: JamiaResponseItem[] = [];
 
     progress.totalBatches = batches.length;
     progress.status = 'migrating';
     onProgress({ ...progress });
 
     for (let i = 0; i < batches.length; i++) {
-      // Check if cancelled
       if (isCancelled) {
         progress.status = 'error';
         progress.errorMessage = 'منتقلی منسوخ کر دی گئی';
@@ -304,9 +285,7 @@ export async function migrateAllRecords(
       }
       
       try {
-        // Add delay between batches (except for the first one)
         if (i > 0) {
-          console.log(`[Migration] Waiting ${BATCH_DELAY_MS}ms before sending next batch...`);
           await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
         }
         
@@ -314,42 +293,31 @@ export async function migrateAllRecords(
         const response = await sendBatch(batches[i]);
 
         progress.completedBatches = i + 1;
-        
-        // Handle both 'inserted' and 'updated' fields from backend
-        const recordsProcessed = (response.inserted || 0) + (response.updated || 0);
-        progress.inserted += recordsProcessed;
-        progress.skipped += (response.skipped || 0);
-        
-        if (response.skippedList && response.skippedList.length > 0) {
-          progress.skippedList.push(...response.skippedList);
-        }
 
-        // Track successfully sent record IDs (exclude skipped CNICs)
-        const skippedCnics = new Set(response.skippedList || []);
-        const batchRecordIds = idBatches[i];
-        const batchMigrationRecords = batches[i];
-        for (let j = 0; j < batchMigrationRecords.length; j++) {
-          if (!skippedCnics.has(batchMigrationRecords[j].cnic)) {
-            successfullyMigratedIds.push(batchRecordIds[j]);
+        if (response.AllResponseslists) {
+          allJamiaResponses.push(...response.AllResponseslists);
+
+          for (const item of response.AllResponseslists) {
+            if (item.Status === 'Admitted') progress.admitted++;
+            else if (item.Status === 'Denied') progress.denied++;
+            else if (item.Status === 'ValidationFailed') {
+              progress.validationFailed++;
+              progress.validationFailedList.push({ cnic: item.CNICNumber, comment: item.Comment });
+            }
           }
         }
 
-        console.log(`[Migration] Batch ${i + 1} complete: ${recordsProcessed} processed, ${response.skipped || 0} skipped`);
+        // All records in this batch were sent successfully (regardless of Jamia's per-record status)
+        successfullyMigratedIds.push(...idBatches[i]);
+
+        console.log(`[Migration] Batch ${i + 1} complete`);
         onProgress({ ...progress });
       } catch (err) {
         console.error(`[Migration] Failed to send batch ${i + 1}/${batches.length}:`, err);
-        
-        // Mark all records in this batch as skipped
-        progress.skipped += batches[i].length;
         progress.completedBatches = i + 1;
         
-        // Add error message but continue with next batch
         if (err instanceof Error) {
-          console.error('[Migration] Batch error:', err.message);
-          
-          // If it's a rate limit error, wait longer before continuing
           if (err.message.includes('429') || err.message.includes('Too many requests')) {
-            console.log('[Migration] Rate limit on migration API, waiting 3 seconds...');
             await new Promise((r) => setTimeout(r, 3000));
           }
         }
@@ -358,14 +326,56 @@ export async function migrateAllRecords(
       }
     }
 
-    // Step 4: Mark successfully migrated records in our DB
+    // Step 4: Mark all sent records with batch ID
     if (successfullyMigratedIds.length > 0) {
       try {
         console.log(`[Migration] Marking ${successfullyMigratedIds.length} records with batch ID: ${batchId}`);
         await adminApi.markRecordsMigrated(successfullyMigratedIds, batchId);
       } catch (err) {
         console.error('[Migration] Failed to mark records as migrated:', err);
-        // Don't fail the whole migration for this — records were already sent
+      }
+    }
+
+    // Step 5: Update statuses based on Jamia response
+    // Build a CNIC→ID map from the records we sent
+    const cnicToId = new Map<string, number>();
+    for (const rec of fullRecords) {
+      cnicToId.set(rec.cnic, rec.id);
+    }
+
+    const statusUpdates: { id: number; status: string; comment: string }[] = [];
+    const validationFailedIds: number[] = [];
+
+    for (const item of allJamiaResponses) {
+      const recordId = cnicToId.get(item.CNICNumber);
+      if (!recordId) continue;
+
+      if (item.Status === 'Admitted') {
+        statusUpdates.push({ id: recordId, status: 'admitted', comment: item.Comment });
+      } else if (item.Status === 'Denied') {
+        statusUpdates.push({ id: recordId, status: 'denied', comment: item.Comment });
+      } else if (item.Status === 'ValidationFailed') {
+        validationFailedIds.push(recordId);
+        statusUpdates.push({ id: recordId, status: 'validation_failed', comment: item.Comment });
+      }
+    }
+
+    if (statusUpdates.length > 0) {
+      try {
+        console.log(`[Migration] Updating ${statusUpdates.length} record statuses from Jamia response`);
+        await adminApi.bulkUpdateStatuses(statusUpdates);
+      } catch (err) {
+        console.error('[Migration] Failed to update statuses:', err);
+      }
+    }
+
+    // Step 6: Clear batch ID for validation-failed records so they can be resent
+    if (validationFailedIds.length > 0) {
+      try {
+        console.log(`[Migration] Clearing batch ID for ${validationFailedIds.length} validation-failed records`);
+        await adminApi.clearMigrationBatch(validationFailedIds);
+      } catch (err) {
+        console.error('[Migration] Failed to clear batch for validation-failed records:', err);
       }
     }
 

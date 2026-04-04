@@ -98,7 +98,11 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
               <td>{record.phone}</td>
               <td>
                 <span className={`badge badge-status-${record.approvalStatus || 'pending'}`}>
-                  {record.approvalStatus === 'approved' ? 'منظور شدہ' : record.approvalStatus === 'disapproved' ? 'مسترد' : 'زیر التواء'}
+                  {record.approvalStatus === 'approved' ? 'منظور شدہ'
+                    : record.approvalStatus === 'disapproved' ? 'مسترد'
+                    : record.approvalStatus === 'admitted' ? 'داخلہ'
+                    : record.approvalStatus === 'denied' ? 'مسترد (جامعہ)'
+                    : 'زیر التواء'}
                 </span>
               </td>
               <td>
@@ -132,6 +136,9 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
                 )}
               </td>
               <td>
+                {record.approvalStatus === 'admitted' || record.approvalStatus === 'denied' ? (
+                  <span className="badge badge-readonly">صرف مشاہدہ</span>
+                ) : (
                 <div className="action-buttons">
                   <button
                     className="btn-edit-small"
@@ -156,6 +163,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
                     <span className="delete-text">حذف</span>
                   </button>
                 </div>
+                )}
               </td>
             </tr>
           ))}

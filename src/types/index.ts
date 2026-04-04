@@ -12,7 +12,7 @@ export interface StudentRecord {
   educationType: string;
   registrationNo: string;
   submittedAt: string;
-  approvalStatus?: 'approved' | 'disapproved' | 'pending' | null;
+  approvalStatus?: 'approved' | 'disapproved' | 'pending' | 'admitted' | 'denied' | null;
   approvedAt?: string | null;
   pictureUrl?: string;
   additionalUrls?: string[];

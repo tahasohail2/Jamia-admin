@@ -197,12 +197,16 @@ const MigrationModal: React.FC<MigrationModalProps> = ({
                     <span className="migration-stat-value">{progress.totalRecords || 0}</span>
                   </div>
                   <div className="migration-stat-item migration-stat-success">
-                    <span className="migration-stat-label">داخل:</span>
-                    <span className="migration-stat-value">{progress.inserted || 0}</span>
+                    <span className="migration-stat-label">داخلہ:</span>
+                    <span className="migration-stat-value">{progress.admitted || 0}</span>
                   </div>
                   <div className="migration-stat-item migration-stat-fail">
-                    <span className="migration-stat-label">چھوڑے گئے:</span>
-                    <span className="migration-stat-value">{progress.skipped || 0}</span>
+                    <span className="migration-stat-label">مسترد:</span>
+                    <span className="migration-stat-value">{progress.denied || 0}</span>
+                  </div>
+                  <div className="migration-stat-item migration-stat-warning">
+                    <span className="migration-stat-label">توثیق ناکام:</span>
+                    <span className="migration-stat-value">{progress.validationFailed || 0}</span>
                   </div>
                 </div>
               )}
@@ -231,24 +235,41 @@ const MigrationModal: React.FC<MigrationModalProps> = ({
                     <span className="migration-stat-value">{progress.totalRecords || 0}</span>
                   </div>
                   <div className="migration-stat-item migration-stat-success">
-                    <span className="migration-stat-label">داخل:</span>
-                    <span className="migration-stat-value">{progress.inserted || 0}</span>
+                    <span className="migration-stat-label">داخلہ:</span>
+                    <span className="migration-stat-value">{progress.admitted || 0}</span>
                   </div>
                   <div className="migration-stat-item migration-stat-fail">
-                    <span className="migration-stat-label">چھوڑے گئے:</span>
-                    <span className="migration-stat-value">{progress.skipped || 0}</span>
+                    <span className="migration-stat-label">مسترد:</span>
+                    <span className="migration-stat-value">{progress.denied || 0}</span>
+                  </div>
+                  <div className="migration-stat-item migration-stat-warning">
+                    <span className="migration-stat-label">توثیق ناکام:</span>
+                    <span className="migration-stat-value">{progress.validationFailed || 0}</span>
                   </div>
                 </div>
               )}
 
-              {progress?.status === 'done' && progress.skippedList.length > 0 && (
+              {progress?.status === 'done' && progress.validationFailedList.length > 0 && (
                 <div className="migration-failures">
-                  <p className="migration-failures-title">چھوڑے گئے ریکارڈز (CNIC):</p>
-                  <ul className="migration-failures-list">
-                    {progress.skippedList.map((cnic, i) => (
-                      <li key={i}>{cnic}</li>
-                    ))}
-                  </ul>
+                  <p className="migration-failures-title">توثیق ناکام ریکارڈز ({progress.validationFailedList.length}):</p>
+                  <table className="migration-failures-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>شناختی کارڈ</th>
+                        <th>وجہ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {progress.validationFailedList.map((item, i) => (
+                        <tr key={i}>
+                          <td>{i + 1}</td>
+                          <td dir="ltr">{item.cnic}</td>
+                          <td dir="ltr">{item.comment}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>

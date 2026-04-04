@@ -723,3 +723,9 @@
   font-size: 13px;
   resize: none;
 }
+
+.migration-finalizing {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}

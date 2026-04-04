@@ -145,6 +145,18 @@ const ResultsPage: React.FC = () => {
     setSelectedRecord(null);
   };
 
+  // Handle inline status change from table dropdown
+  const handleStatusChange = async (record: StudentRecord, status: 'approved' | 'disapproved' | 'pending' | null) => {
+    try {
+      await adminApi.updateApprovalStatus(record.id, status);
+      const statusLabel = status === 'approved' ? 'منظور شدہ' : status === 'disapproved' ? 'مسترد' : 'زیر التواء';
+      showToast(`${record.studentName} کا اسٹیٹس ${statusLabel} ہو گیا`, 'success');
+      refresh();
+    } catch (error) {
+      showToast('اسٹیٹس اپ ڈیٹ نہیں ہو سکا', 'error');
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="results-page">
@@ -185,6 +197,7 @@ const ResultsPage: React.FC = () => {
             onRecordClick={handleRecordClick}
             onEditClick={handleEditClick}
             onDeleteClick={handleDeleteClick}
+            onStatusChange={handleStatusChange}
           />
         </div>
 

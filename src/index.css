@@ -1721,3 +1721,33 @@ tr:hover {
     min-width: auto;
   }
 }
+
+/* Approval dropdown in table */
+.approval-dropdown-table {
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-family: inherit;
+  min-width: 80px;
+}
+
+.approval-dropdown-table.pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border-color: #ffc107;
+}
+
+.approval-dropdown-table.approved {
+  background-color: #d4edda;
+  color: #155724;
+  border-color: #28a745;
+}
+
+.approval-dropdown-table.disapproved {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #dc3545;
+}

@@ -7,6 +7,7 @@ interface RecordsTableProps {
   onRecordClick: (record: StudentRecord) => void;
   onEditClick: (record: StudentRecord) => void;
   onDeleteClick: (record: StudentRecord) => void;
+  onStatusChange: (record: StudentRecord, status: 'approved' | 'disapproved' | 'pending' | null) => void;
 }
 
 const RecordsTable: React.FC<RecordsTableProps> = ({
@@ -15,6 +16,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
   onRecordClick,
   onEditClick,
   onDeleteClick,
+  onStatusChange,
 }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -140,6 +142,20 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
                   <span className="badge badge-readonly">صرف مشاہدہ</span>
                 ) : (
                 <div className="action-buttons">
+                  <select
+                    className={`approval-dropdown-table ${record.approvalStatus || 'pending'}`}
+                    value={record.approvalStatus || 'pending'}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      const val = e.target.value;
+                      onStatusChange(record, val === 'pending' ? null : val as 'approved' | 'disapproved');
+                    }}
+                  >
+                    <option value="pending">زیر التواء</option>
+                    <option value="approved">منظور شدہ</option>
+                    <option value="disapproved">مسترد</option>
+                  </select>
                   <button
                     className="btn-edit-small"
                     onClick={(e) => {

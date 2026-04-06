@@ -9,6 +9,8 @@ interface DashboardStats {
   approvedEntries: number;
   disapprovedEntries: number;
   pendingEntries: number;
+  admittedEntries: number;
+  deniedEntries: number;
   recentEntries: Array<{ date: string; count: number }>;
 }
 
@@ -19,6 +21,8 @@ const DashboardPage: React.FC = () => {
     approvedEntries: 0,
     disapprovedEntries: 0,
     pendingEntries: 0,
+    admittedEntries: 0,
+    deniedEntries: 0,
     recentEntries: [],
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +41,8 @@ const DashboardPage: React.FC = () => {
       const approved = records.filter(r => r.approvalStatus === 'approved').length;
       const disapproved = records.filter(r => r.approvalStatus === 'disapproved').length;
       const pending = records.filter(r => !r.approvalStatus).length;
+      const admitted = records.filter(r => r.approvalStatus === 'admitted').length;
+      const denied = records.filter(r => r.approvalStatus === 'denied').length;
 
       // Calculate entries by date (last 7 days)
       const dateMap = new Map<string, number>();
@@ -65,6 +71,8 @@ const DashboardPage: React.FC = () => {
         approvedEntries: approved,
         disapprovedEntries: disapproved,
         pendingEntries: pending,
+        admittedEntries: admitted,
+        deniedEntries: denied,
         recentEntries,
       });
     } catch (error) {
@@ -84,6 +92,14 @@ const DashboardPage: React.FC = () => {
 
   const pendingPercentage = stats.totalEntries > 0
     ? Math.round((stats.pendingEntries / stats.totalEntries) * 100)
+    : 0;
+
+  const admittedPercentage = stats.totalEntries > 0
+    ? Math.round((stats.admittedEntries / stats.totalEntries) * 100)
+    : 0;
+
+  const deniedPercentage = stats.totalEntries > 0
+    ? Math.round((stats.deniedEntries / stats.totalEntries) * 100)
     : 0;
 
   const maxCount = Math.max(...stats.recentEntries.map(e => e.count), 1);
@@ -170,6 +186,37 @@ const DashboardPage: React.FC = () => {
                   <h3 className="kpi-value">{stats.pendingEntries}</h3>
                 </div>
               </div>
+
+              <div className="kpi-card clickable" onClick={() => navigateToResults('admitted')}>
+                <div className="kpi-icon admitted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                </div>
+                <div className="kpi-content">
+                  <p className="kpi-label">داخل شدہ</p>
+                  <h3 className="kpi-value">
+                    {stats.admittedEntries}
+                    <span className="kpi-badge admitted">{admittedPercentage}%</span>
+                  </h3>
+                </div>
+              </div>
+
+              <div className="kpi-card clickable" onClick={() => navigateToResults('denied')}>
+                <div className="kpi-icon denied">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                  </svg>
+                </div>
+                <div className="kpi-content">
+                  <p className="kpi-label">انکار شدہ</p>
+                  <h3 className="kpi-value">
+                    {stats.deniedEntries}
+                    <span className="kpi-badge denied">{deniedPercentage}%</span>
+                  </h3>
+                </div>
+              </div>
             </div>
 
             {/* Charts Section */}
@@ -215,51 +262,32 @@ const DashboardPage: React.FC = () => {
                 <div className="chart-content">
                   <div className="donut-chart">
                     <svg viewBox="0 0 200 200" className="donut-svg">
-                      {/* Background circle */}
-                      <circle
-                        cx="100"
-                        cy="100"
-                        r="80"
-                        fill="none"
-                        stroke="#e0e0e0"
-                        strokeWidth="30"
-                      />
-                      {/* Approved section (green) */}
-                      <circle
-                        cx="100"
-                        cy="100"
-                        r="80"
-                        fill="none"
-                        stroke="#28a745"
-                        strokeWidth="30"
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#e0e0e0" strokeWidth="30" />
+                      {/* Approved (green) */}
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#28a745" strokeWidth="30"
                         strokeDasharray={`${approvalPercentage * 5.03} 503`}
                         strokeDashoffset="0"
-                        transform="rotate(-90 100 100)"
-                      />
-                      {/* Disapproved section (red) */}
-                      <circle
-                        cx="100"
-                        cy="100"
-                        r="80"
-                        fill="none"
-                        stroke="#dc3545"
-                        strokeWidth="30"
+                        transform="rotate(-90 100 100)" />
+                      {/* Disapproved (red) */}
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#dc3545" strokeWidth="30"
                         strokeDasharray={`${disapprovalPercentage * 5.03} 503`}
                         strokeDashoffset={`-${approvalPercentage * 5.03}`}
-                        transform="rotate(-90 100 100)"
-                      />
-                      {/* Pending section (yellow) */}
-                      <circle
-                        cx="100"
-                        cy="100"
-                        r="80"
-                        fill="none"
-                        stroke="#ffc107"
-                        strokeWidth="30"
+                        transform="rotate(-90 100 100)" />
+                      {/* Pending (yellow) */}
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#ffc107" strokeWidth="30"
                         strokeDasharray={`${pendingPercentage * 5.03} 503`}
                         strokeDashoffset={`-${(approvalPercentage + disapprovalPercentage) * 5.03}`}
-                        transform="rotate(-90 100 100)"
-                      />
+                        transform="rotate(-90 100 100)" />
+                      {/* Admitted (blue) */}
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#17a2b8" strokeWidth="30"
+                        strokeDasharray={`${admittedPercentage * 5.03} 503`}
+                        strokeDashoffset={`-${(approvalPercentage + disapprovalPercentage + pendingPercentage) * 5.03}`}
+                        transform="rotate(-90 100 100)" />
+                      {/* Denied (orange) */}
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#fd7e14" strokeWidth="30"
+                        strokeDasharray={`${deniedPercentage * 5.03} 503`}
+                        strokeDashoffset={`-${(approvalPercentage + disapprovalPercentage + pendingPercentage + admittedPercentage) * 5.03}`}
+                        transform="rotate(-90 100 100)" />
                     </svg>
                     <div className="donut-center">
                       <span className="donut-total">{stats.totalEntries}</span>
@@ -278,6 +306,14 @@ const DashboardPage: React.FC = () => {
                     <div className="legend-item">
                       <span className="legend-dot pending"></span>
                       <span className="legend-label">زیر التواء ({stats.pendingEntries})</span>
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-dot admitted"></span>
+                      <span className="legend-label">داخل شدہ ({stats.admittedEntries})</span>
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-dot denied"></span>
+                      <span className="legend-label">انکار شدہ ({stats.deniedEntries})</span>
                     </div>
                   </div>
                 </div>

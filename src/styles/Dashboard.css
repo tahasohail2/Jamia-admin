@@ -94,6 +94,16 @@
   color: white;
 }
 
+.kpi-icon.admitted {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+}
+
+.kpi-icon.denied {
+  background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+  color: white;
+}
+
 .kpi-content {
   flex: 1;
   min-width: 0;
@@ -133,6 +143,16 @@
 .kpi-badge.disapproved {
   background: #f8d7da;
   color: #721c24;
+}
+
+.kpi-badge.admitted {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.kpi-badge.denied {
+  background: #ffe5d0;
+  color: #7d3a00;
 }
 
 /* Charts Grid */
@@ -300,6 +320,14 @@
 
 .legend-dot.pending {
   background: #ffc107;
+}
+
+.legend-dot.admitted {
+  background: #17a2b8;
+}
+
+.legend-dot.denied {
+  background: #fd7e14;
 }
 
 .legend-label {

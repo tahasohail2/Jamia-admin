@@ -96,6 +96,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             {!isCollapsed && <span>داخلہ جات</span>}
           </NavLink>
 
+          <NavLink
+            to="/batch-list"
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            title="بیچ وار فہرست"
+          >
+            <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 6h16M4 10h16M4 14h10M4 18h6" />
+            </svg>
+            {!isCollapsed && <span>بیچ وار فہرست</span>}
+          </NavLink>
+
           {user?.isSuperAdmin && (
             <NavLink 
               to="/users" 

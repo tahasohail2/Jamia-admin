@@ -18,6 +18,7 @@ export interface StudentRecord {
   additionalUrls?: string[];
   migrationBatchId?: string | null;
   migratedAt?: string | null;
+  migrationComment?: string | null;
 }
 
 export interface FullStudentRecord extends StudentRecord {

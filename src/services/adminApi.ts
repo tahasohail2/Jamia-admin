@@ -282,6 +282,36 @@ class AdminApi {
       throw new Error('An unexpected error occurred');
     }
   }
+
+  async getAdmissionStatus(): Promise<{ is_admission_open: boolean; message: string }> {
+    try {
+      const response = await axiosInstance.get('/api/admissions/status');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch admission status');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async updateAdmissionStatus(
+    is_admission_open: boolean,
+    reason: string | null
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await axiosInstance.patch('/api/admin/settings/admission-status', {
+        is_admission_open,
+        reason,
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to update admission status');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
 }
 
 export const adminApi = new AdminApi();

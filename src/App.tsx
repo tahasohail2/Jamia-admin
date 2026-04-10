@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import ResultsPage from './pages/ResultsPage';
 import UserManagementPage from './pages/UserManagementPage';
 import BatchWiseListPage from './pages/BatchWiseListPage';
+import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ToastContainer from './components/ToastContainer';
 
@@ -49,6 +50,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BatchWiseListPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
                 </ProtectedRoute>
               }
             />

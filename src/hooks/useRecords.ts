@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminApi } from '../services/adminApi';
 import { StudentRecord, RecordFilters, PaginatedResponse } from '../types';
+import { useSession } from '../context/SessionContext';
 
 const DEFAULT_PAGE_SIZE = 50;
 const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
 
 export const useRecords = (initialFilters?: RecordFilters) => {
+  const { sessionYear } = useSession();
   const [records, setRecords] = useState<StudentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +29,7 @@ export const useRecords = (initialFilters?: RecordFilters) => {
 
       const response: PaginatedResponse<StudentRecord> = await adminApi.getRecords({
         ...filters,
+        sessionYear,
         page: currentPage,
         pageSize,
       });
@@ -47,7 +50,7 @@ export const useRecords = (initialFilters?: RecordFilters) => {
         setIsLoading(false);
       }
     }
-  }, [filters, currentPage, pageSize]);
+  }, [filters, currentPage, pageSize, sessionYear]);
 
   // Initial fetch and refetch when dependencies change
   useEffect(() => {

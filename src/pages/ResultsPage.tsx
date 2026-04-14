@@ -191,9 +191,21 @@ const ResultsPage: React.FC = () => {
 
         {/* Records Table */}
         <div className="results-content">
+          {/* Pagination — top */}
+          {!isLoading && !error && records.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalRecords={totalRecords}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+            />
+          )}
           <RecordsTable
             records={records}
             isLoading={isLoading}
+            currentPage={currentPage}
+            pageSize={pageSize}
             onRecordClick={handleRecordClick}
             onEditClick={handleEditClick}
             onDeleteClick={handleDeleteClick}
@@ -234,6 +246,7 @@ const ResultsPage: React.FC = () => {
         isSaving={isSaving}
         onSave={handleEditSave}
         onClose={handleEditModalClose}
+        onMigrated={refresh}
       />
     </DashboardLayout>
   );

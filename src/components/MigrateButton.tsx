@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { migrateAllRecords, MigrationProgress, cancelMigration } from '../services/migrationApi';
 import { useToast } from '../context/ToastContext';
+import { useSession } from '../context/SessionContext';
 import MigrationModal from './MigrationModal';
 import CancelConfirmDialog from './CancelConfirmDialog';
 
 const MigrateButton: React.FC<{ onMigrationComplete?: () => void }> = ({ onMigrationComplete }) => {
   const { showToast } = useToast();
+  const { sessionYear } = useSession();
   const [progress, setProgress] = useState<MigrationProgress | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -65,7 +67,7 @@ const MigrateButton: React.FC<{ onMigrationComplete?: () => void }> = ({ onMigra
   };
 
   const handleConfirmMigration = async () => {
-    const result = await migrateAllRecords(setProgress);
+    const result = await migrateAllRecords(setProgress, sessionYear);
 
     if (result.status === 'done') {
       const admitted = result.admitted || 0;
@@ -106,6 +108,7 @@ const MigrateButton: React.FC<{ onMigrationComplete?: () => void }> = ({ onMigra
       <MigrationModal
         isOpen={isModalOpen}
         progress={progress}
+        sessionYear={sessionYear}
         onConfirm={handleConfirmMigration}
         onCancel={handleCancelModal}
         onClose={handleCloseModal}

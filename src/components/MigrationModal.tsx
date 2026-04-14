@@ -6,6 +6,7 @@ import { formatDateTimeCompact } from '../utils/formatters';
 interface MigrationModalProps {
   isOpen: boolean;
   progress: MigrationProgress | null;
+  sessionYear: number;
   onConfirm: () => void;
   onCancel: () => void;
   onClose: () => void;
@@ -15,6 +16,7 @@ interface MigrationModalProps {
 const MigrationModal: React.FC<MigrationModalProps> = ({
   isOpen,
   progress,
+  sessionYear,
   onConfirm,
   onCancel,
   onClose,
@@ -39,7 +41,7 @@ const MigrationModal: React.FC<MigrationModalProps> = ({
     if (isOpen && !progress) {
       setLoadingCount(true);
       adminApi
-        .getRecords({ approvalStatus: 'approved', migrationBatchId: 'not_migrated', pageSize: 10000 })
+        .getRecords({ approvalStatus: 'approved', migrationBatchId: 'not_migrated', pageSize: 10000, sessionYear })
         .then((res) => {
           const withRegNo = res.data.filter((r) => r.registrationNo && r.registrationNo.trim() !== '');
           setApprovedCount(withRegNo.length);
@@ -49,7 +51,7 @@ const MigrationModal: React.FC<MigrationModalProps> = ({
         })
         .finally(() => setLoadingCount(false));
     }
-  }, [isOpen, progress]);
+  }, [isOpen, progress, sessionYear]);
 
   if (!isOpen) return null;
 

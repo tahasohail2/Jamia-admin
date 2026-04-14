@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FullStudentRecord } from '../types';
+import { migrateSingleRecord } from '../services/migrationApi';
+import { useToast } from '../context/ToastContext';
 
 interface EditRecordModalProps {
   isOpen: boolean;
@@ -7,7 +9,14 @@ interface EditRecordModalProps {
   isSaving: boolean;
   onSave: (id: number, data: Partial<FullStudentRecord>) => void;
   onClose: () => void;
+  onMigrated?: () => void;
 }
+
+type MigrateResult = {
+  status: 'admitted' | 'denied' | 'validation_failed' | 'error';
+  comment: string;
+  batchId?: string;
+} | null;
 
 const EditRecordModal: React.FC<EditRecordModalProps> = ({
   isOpen,
@@ -15,12 +24,17 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({
   isSaving,
   onSave,
   onClose,
+  onMigrated,
 }) => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<Partial<FullStudentRecord>>({});
   const [cnicError, setCnicError] = useState('');
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [migrateResult, setMigrateResult] = useState<MigrateResult>(null);
 
   useEffect(() => {
     if (record) {
+      setMigrateResult(null);
       setFormData({
         studentName: record.studentName,
         fatherName: record.fatherName,
@@ -80,6 +94,24 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({
       return;
     }
     onSave(record.id, formData);
+  };
+
+  const handleMigrate = async () => {
+    if (!record) return;
+    setMigrateResult(null);
+    const result = await migrateSingleRecord(record, setIsMigrating);
+    setMigrateResult(result);
+    if (result.status === 'admitted') {
+      showToast('ریکارڈ کامیابی سے منتقل ہو گیا — داخل شدہ', 'success');
+      onMigrated?.();
+    } else if (result.status === 'denied') {
+      showToast('ریکارڈ منتقل ہوا — مسترد', 'warning');
+      onMigrated?.();
+    } else if (result.status === 'validation_failed') {
+      showToast('توثیق ناکام — ریکارڈ منتقل نہیں ہوا', 'error');
+    } else {
+      showToast(result.comment || 'منتقلی ناکام ہو گئی', 'error');
+    }
   };
 
   const isNewAdmission = formData.admissionType === 'نیا داخلہ';
@@ -236,11 +268,55 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({
                 )}
               </div>
             </div>
+
+            {/* Single-record migration result */}
+            {migrateResult && (
+              <div className="detail-section">
+                <h3 className="section-title">منتقلی کا نتیجہ</h3>
+                <div className={`single-migrate-result single-migrate-${migrateResult.status}`}>
+                  <div className="single-migrate-row">
+                    <span className="single-migrate-status-label">
+                      {migrateResult.status === 'admitted' && '✓ داخل شدہ'}
+                      {migrateResult.status === 'denied' && '✕ مسترد'}
+                      {migrateResult.status === 'validation_failed' && '⚠ توثیق ناکام'}
+                      {migrateResult.status === 'error' && '✕ خرابی'}
+                    </span>
+                    {migrateResult.batchId && (
+                      <span className="single-migrate-batch" dir="ltr">
+                        بیچ: {migrateResult.batchId}
+                      </span>
+                    )}
+                  </div>
+                  {migrateResult.comment && (
+                    <p className="single-migrate-comment" dir="ltr">{migrateResult.comment}</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSaving}>منسوخ</button>
-            <button type="submit" className="btn btn-primary" disabled={isSaving}>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSaving || isMigrating}>منسوخ</button>
+            {record.approvalStatus === 'approved' && !record.migrationBatchId && (
+              <button
+                type="button"
+                className="btn btn-migrate"
+                onClick={handleMigrate}
+                disabled={isSaving || isMigrating}
+              >
+                {isMigrating ? (
+                  <><span className="btn-spinner-sm" /> منتقل ہو رہا ہے...</>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
+                      <path d="M12 5v14M5 12l7-7 7 7" />
+                    </svg>
+                    منتقل کریں
+                  </>
+                )}
+              </button>
+            )}
+            <button type="submit" className="btn btn-primary" disabled={isSaving || isMigrating}>
               {isSaving ? 'محفوظ ہو رہا ہے...' : 'محفوظ کریں'}
             </button>
           </div>

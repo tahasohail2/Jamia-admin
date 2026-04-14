@@ -4,6 +4,8 @@ import { StudentRecord } from '../types';
 interface RecordsTableProps {
   records: StudentRecord[];
   isLoading: boolean;
+  currentPage?: number;
+  pageSize?: number;
   onRecordClick: (record: StudentRecord) => void;
   onEditClick: (record: StudentRecord) => void;
   onDeleteClick: (record: StudentRecord) => void;
@@ -13,11 +15,14 @@ interface RecordsTableProps {
 const RecordsTable: React.FC<RecordsTableProps> = ({
   records,
   isLoading,
+  currentPage = 1,
+  pageSize = 20,
   onRecordClick,
   onEditClick,
   onDeleteClick,
   onStatusChange,
 }) => {
+  const startIndex = (currentPage - 1) * pageSize;
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -58,6 +63,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
       <table className="records-table">
         <thead>
           <tr>
+            <th>#</th>
             <th>داخلہ نمبر</th>
             <th>طالب علم کا نام</th>
             <th>والد کا نام</th>
@@ -77,13 +83,14 @@ const RecordsTable: React.FC<RecordsTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {records.map((record) => (
+          {records.map((record, index) => (
             <tr
               key={record.id}
               className="table-row"
               onClick={() => onRecordClick(record)}
               style={{ cursor: 'pointer' }}
             >
+              <td style={{ textAlign: 'center', color: '#888', fontSize: 13 }}>{startIndex + index + 1}</td>
               <td>{record.registrationNo || 'غیر متعین'}</td>
               <td>{record.studentName}</td>
               <td>{record.fatherName}</td>

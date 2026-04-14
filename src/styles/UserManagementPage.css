@@ -176,8 +176,10 @@
 }
 
 .btn-action.btn-edit {
-  color: #007bff;
-  border-color: #007bff;
+    background: #e4e3ff;
+    color: #007bff;
+    border-color: #003b7b;
+    border: 1px solid ;
 }
 
 .btn-action.btn-edit:hover {

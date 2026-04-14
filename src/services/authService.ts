@@ -11,14 +11,6 @@ const axiosInstance = axios.create({
   },
 });
 
-// Attach adminToken as Authorization header (browsers block manual Cookie header)
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken');
-  if (token) {
-    config.headers['Cookie'] = `adminToken=${token}`;
-  }
-  return config;
-});
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {

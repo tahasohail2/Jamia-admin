@@ -87,7 +87,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === 1}
           aria-label="Previous page"
         >
-          ← پچھلا
+          → پچھلا
         </button>
 
         <div className="pagination-pages">
@@ -116,7 +116,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === totalPages}
           aria-label="Next page"
         >
-          اگلا →
+          اگلا ←
         </button>
       </div>
     </div>

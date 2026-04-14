@@ -156,8 +156,59 @@ function generateBatchId(): string {
   return `B-${mm}${dd}-${hh}${min}`;
 }
 
+export async function migrateSingleRecord(
+  record: FullStudentRecord,
+  onProgress: (isMigrating: boolean) => void
+): Promise<{ status: 'admitted' | 'denied' | 'validation_failed' | 'error'; comment: string; batchId?: string }> {
+  const batchId = generateBatchId();
+  onProgress(true);
+
+  try {
+    const migrationRecord = toMigrationRecord(record);
+    const response = await sendBatch([migrationRecord]);
+
+    const item = response.AllResponseslists?.find(
+      (r) => r.CNICNumber === record.cnic
+    ) ?? response.AllResponseslists?.[0];
+
+    let status: 'admitted' | 'denied' | 'validation_failed' | 'error';
+    let comment = item?.Comment ?? '';
+
+    if (!item) {
+      status = 'error';
+      comment = 'API سے کوئی جواب نہیں ملا';
+    } else if (item.Status === 'Admitted') {
+      status = 'admitted';
+    } else if (item.Status === 'Denied') {
+      status = 'denied';
+    } else {
+      status = 'validation_failed';
+    }
+
+    // Persist to backend
+    if (status === 'admitted' || status === 'denied') {
+      try {
+        await adminApi.markRecordsMigrated([record.id], batchId);
+        await adminApi.bulkUpdateStatuses([{ id: record.id, status, comment }]);
+      } catch (_) { /* non-critical */ }
+    } else if (status === 'validation_failed') {
+      try {
+        await adminApi.bulkUpdateStatuses([{ id: record.id, status: 'validation_failed', comment }]);
+      } catch (_) { /* non-critical */ }
+    }
+
+    return { status, comment, batchId: (status === 'admitted' || status === 'denied') ? batchId : undefined };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'منتقلی ناکام ہو گئی';
+    return { status: 'error', comment: message };
+  } finally {
+    onProgress(false);
+  }
+}
+
 export async function migrateAllRecords(
-  onProgress: (progress: MigrationProgress) => void
+  onProgress: (progress: MigrationProgress) => void,
+  sessionYear?: number
 ): Promise<MigrationProgress> {
   isCancelled = false;
 
@@ -179,9 +230,9 @@ export async function migrateAllRecords(
   onProgress({ ...progress });
 
   try {
-    const listResponse = await adminApi.getRecords({ pageSize: 10000, approvalStatus: 'approved', migrationBatchId: 'not_migrated' });
+    const listResponse = await adminApi.getRecords({ pageSize: 10000, approvalStatus: 'approved', migrationBatchId: 'not_migrated', sessionYear });
     const recordsWithRegNo = listResponse.data.filter((r) => r.registrationNo && r.registrationNo.trim() !== '');
-    progress.totalRecords = recordsWithRegNo.length;
+    progress.totalRecords = listResponse.data.length;
 
     if (recordsWithRegNo.length === 0) {
       progress.status = 'done';

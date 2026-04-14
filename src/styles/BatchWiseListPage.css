@@ -85,6 +85,12 @@
   color: #666;
 }
 
+.batch-tab-date {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
 /* Content area */
 .batch-content {
   flex: 1;

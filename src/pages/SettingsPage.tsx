@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { adminApi } from '../services/adminApi';
 import { useToast } from '../context/ToastContext';
+import { useSession } from '../context/SessionContext';
 import '../styles/SettingsPage.css';
 
 const SettingsPage: React.FC = () => {
   const { showToast } = useToast();
+  const { sessionYear, setSessionYear, sessionYears } = useSession();
   const [isOpen, setIsOpen] = useState(true);
   const [statusMessage, setStatusMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -88,49 +90,88 @@ const SettingsPage: React.FC = () => {
           <p className="settings-subtitle">سسٹم کی ترتیبات کا انتظام کریں</p>
         </div>
 
-        <div className="settings-card">
-          <div className="settings-card-header">
-            <div>
-              <h3 className="settings-card-title">داخلہ کی حیثیت</h3>
-              <p className="settings-card-desc">
-                کنٹرول کریں کہ آیا طلباء نئی رجسٹریشن جمع کر سکتے ہیں
-              </p>
+        <div className="settings-cards-grid">
+          <div className="settings-card">
+            <div className="settings-card-header">
+              <div>
+                <h3 className="settings-card-title">داخلہ کی حیثیت</h3>
+                <p className="settings-card-desc">
+                  کنٹرول کریں کہ آیا طلباء نئی رجسٹریشن جمع کر سکتے ہیں
+                </p>
+              </div>
             </div>
+
+            {initialLoading ? (
+              <div className="settings-skeleton" />
+            ) : (
+              <div className="toggle-block">
+                <div className="toggle-row">
+                  <button
+                    role="switch"
+                    aria-checked={isOpen}
+                    aria-label="داخلہ کی حیثیت ٹوگل کریں"
+                    className={`toggle-switch ${isOpen ? 'toggle-on' : 'toggle-off'}`}
+                    onClick={() => !loading && handleToggle(!isOpen)}
+                    disabled={loading}
+                  >
+                    <span className="toggle-thumb">
+                      {loading && <span className="toggle-spinner" />}
+                    </span>
+                  </button>
+                  <span className={`toggle-state-label ${isOpen ? 'label-open' : 'label-closed'}`}>
+                    {isOpen ? 'کھلا' : 'بند'}
+                  </span>
+                </div>
+
+                <div className={`status-pill ${isOpen ? 'status-pill-open' : 'status-pill-closed'}`}>
+                  <span className={`status-dot ${isOpen ? 'dot-open' : 'dot-closed'}`} />
+                  <span className="status-pill-text">
+                    {isOpen
+                      ? 'رجسٹریشن فی الحال کھلی ہے'
+                      : <>{`بند`} &mdash; <em>{statusMessage}</em></>
+                    }
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
-          {initialLoading ? (
-            <div className="settings-skeleton" />
-          ) : (
-            <div className="toggle-block">
-              <div className="toggle-row">
-                <button
-                  role="switch"
-                  aria-checked={isOpen}
-                  aria-label="داخلہ کی حیثیت ٹوگل کریں"
-                  className={`toggle-switch ${isOpen ? 'toggle-on' : 'toggle-off'}`}
-                  onClick={() => !loading && handleToggle(!isOpen)}
-                  disabled={loading}
-                >
-                  <span className="toggle-thumb">
-                    {loading && <span className="toggle-spinner" />}
-                  </span>
-                </button>
-                <span className={`toggle-state-label ${isOpen ? 'label-open' : 'label-closed'}`}>
-                  {isOpen ? 'کھلا' : 'بند'}
-                </span>
+          {/* Session Year Card */}
+          <div className="settings-card">
+            <div className="settings-card-header">
+              <div>
+                <h3 className="settings-card-title">موجودہ سیشن</h3>
+                <p className="settings-card-desc">
+                  تمام ڈیٹا (نتائج، ریکارڈز، تجزیات) اس سیشن کے مطابق فلٹر ہوگا
+                </p>
               </div>
-
-              <div className={`status-pill ${isOpen ? 'status-pill-open' : 'status-pill-closed'}`}>
-                <span className={`status-dot ${isOpen ? 'dot-open' : 'dot-closed'}`} />
-                <span className="status-pill-text">
-                  {isOpen
-                    ? 'رجسٹریشن فی الحال کھلی ہے'
-                    : <>{`بند`} &mdash; <em>{statusMessage}</em></>
-                  }
+            </div>
+            <div className="session-selector-block">
+              <label className="session-label" htmlFor="session-year-select">
+                سیشن سال منتخب کریں
+              </label>
+              <div className="session-select-row">
+                <select
+                  id="session-year-select"
+                  className="session-select"
+                  value={sessionYear}
+                  onChange={(e) => {
+                    const year = parseInt(e.target.value, 10);
+                    setSessionYear(year);
+                    showToast(`سیشن ${year} منتخب ہو گیا`, 'success');
+                  }}
+                >
+                  {sessionYears.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+                <span className="session-active-badge">
+                  <span className="session-active-dot" />
+                  فعال سیشن: {sessionYear}
                 </span>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 

@@ -110,8 +110,6 @@ const BatchWiseListPage: React.FC = () => {
       await adminApi.updateRecord(id, { ...rest, approvalComments });
       await adminApi.updateApprovalStatus(id, (approvalStatus || null) as 'approved' | 'disapproved' | 'pending' | null);
       showToast('ریکارڈ کامیابی سے اپ ڈیٹ ہو گیا', 'success');
-      setIsEditModalOpen(false);
-      setRecordToEdit(null);
       if (selectedBatch) fetchBatchRecords(selectedBatch);
     } catch {
       showToast('ریکارڈ اپ ڈیٹ نہیں ہو سکا', 'error');
@@ -173,6 +171,9 @@ const BatchWiseListPage: React.FC = () => {
                 >
                   <span className="batch-tab-id">{b.batchId}</span>
                   <span className="batch-tab-count">{b.totalRecords} طلباء</span>
+                  <span className="batch-tab-date">
+                    {new Date(b.migratedAt).toLocaleDateString('ur-PK')}
+                  </span>
                 </button>
               ))}
             </div>
@@ -325,6 +326,7 @@ const BatchWiseListPage: React.FC = () => {
         isSaving={isSaving}
         onSave={handleEditSave}
         onClose={() => { setIsEditModalOpen(false); setRecordToEdit(null); }}
+        onMigrated={() => { if (selectedBatch) fetchBatchRecords(selectedBatch); }}
       />
     </DashboardLayout>
   );

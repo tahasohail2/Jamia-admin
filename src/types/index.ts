@@ -99,6 +99,7 @@ export interface RecordFilters {
   department?: string;
   approvalStatus?: string;
   migrationBatchId?: string;
+  sessionYear?: number;
   page?: number;
   pageSize?: number;
 }

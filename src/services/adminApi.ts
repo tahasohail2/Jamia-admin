@@ -52,6 +52,7 @@ class AdminApi {
       if (filters.department) params.append('department', filters.department);
       if (filters.approvalStatus) params.append('approvalStatus', filters.approvalStatus);
       if (filters.migrationBatchId) params.append('migrationBatchId', filters.migrationBatchId);
+      if (filters.sessionYear) params.append('sessionYear', filters.sessionYear.toString());
       if (filters.page) params.append('page', filters.page.toString());
       if (filters.pageSize) params.append('pageSize', filters.pageSize.toString());
 
@@ -134,6 +135,7 @@ class AdminApi {
       if (filters.department) params.append('department', filters.department);
       if (filters.approvalStatus) params.append('approvalStatus', filters.approvalStatus);
       if (filters.migrationBatchId) params.append('migrationBatchId', filters.migrationBatchId);
+      if (filters.sessionYear) params.append('sessionYear', filters.sessionYear.toString());
 
       const response = await axiosInstance.get(
         `/api/admin/records/export?${params.toString()}`,
@@ -278,6 +280,18 @@ class AdminApi {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Failed to clear migration batch');
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  async createStudent(data: Record<string, unknown>): Promise<FullStudentRecord> {
+    try {
+      const response = await axiosInstance.post<FullStudentRecord>('/api/admin/records', data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to create student record');
       }
       throw new Error('An unexpected error occurred');
     }

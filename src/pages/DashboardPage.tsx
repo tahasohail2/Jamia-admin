@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { adminApi } from '../services/adminApi';
+import { useSession } from '../context/SessionContext';
 import '../styles/Dashboard.css';
 
 interface DashboardStats {
@@ -16,6 +17,7 @@ interface DashboardStats {
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const { sessionYear } = useSession();
   const [stats, setStats] = useState<DashboardStats>({
     totalEntries: 0,
     approvedEntries: 0,
@@ -29,13 +31,13 @@ const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     fetchDashboardStats();
-  }, []);
+  }, [sessionYear]);
 
   const fetchDashboardStats = async () => {
     try {
       setIsLoading(true);
-      // Fetch all records to calculate stats
-      const response = await adminApi.getRecords({ pageSize: 1000 });
+      // Fetch all records filtered by the current session year
+      const response = await adminApi.getRecords({ pageSize: 1000, sessionYear });
       const records = response.data;
 
       const approved = records.filter(r => r.approvalStatus === 'approved').length;
@@ -114,7 +116,7 @@ const DashboardPage: React.FC = () => {
       <div className="dashboard-page">
         <div className="dashboard-header">
           <h2 className="dashboard-title">ڈیش بورڈ</h2>
-          <p className="dashboard-subtitle">تجزیاتی جائزہ</p>
+          <p className="dashboard-subtitle">تجزیاتی جائزہ — سیشن {sessionYear}</p>
         </div>
 
         {isLoading ? (
